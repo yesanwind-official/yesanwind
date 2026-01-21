@@ -1,0 +1,558 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant light (&:is(.light *));
+
+/* 예산윈드오케스트라 다크 테마 디자인 시스템 */
+:root,
+.dark {
+  /* Gold 계열 - 메인 포인트 컬러 */
+  --color-gold-50: #fefce8;
+  --color-gold-100: #fef9c3;
+  --color-gold-200: #fef08a;
+  --color-gold-300: #fde047;
+  --color-gold-400: #facc15;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #b8962e;
+  --color-gold-700: #a17c1a;
+  --color-gold-800: #854d0e;
+  --color-gold-900: #713f12;
+
+  /* Dark 배경 계열 */
+  --color-dark-950: #0a0a0a;
+  --color-dark-900: #121212;
+  --color-dark-800: #1a1a1a;
+  --color-dark-700: #242424;
+  --color-dark-600: #2a2a2a;
+  --color-dark-500: #3a3a3a;
+  --color-dark-400: #525252;
+  --color-dark-300: #737373;
+  --color-dark-200: #a3a3a3;
+  --color-dark-100: #d4d4d4;
+
+  /* Semantic Colors */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  --radius: 0.5rem;
+
+  /* shadcn/ui 다크 테마 */
+  --background: #121212;
+  --foreground: #fafafa;
+  --card: #1a1a1a;
+  --card-foreground: #fafafa;
+  --popover: #1a1a1a;
+  --popover-foreground: #fafafa;
+  --primary: #d4af37;
+  --primary-foreground: #0a0a0a;
+  --secondary: #242424;
+  --secondary-foreground: #fafafa;
+  --muted: #2a2a2a;
+  --muted-foreground: #a3a3a3;
+  --accent: #2a2a2a;
+  --accent-foreground: #fafafa;
+  --destructive: #ef4444;
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: #d4af37;
+
+  --chart-1: #d4af37;
+  --chart-2: #b8962e;
+  --chart-3: #a17c1a;
+  --chart-4: #fde047;
+  --chart-5: #facc15;
+
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #d4af37;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #2a2a2a;
+  --sidebar-ring: #d4af37;
+}
+
+/* 라이트 테마 */
+.light {
+  /* Gold 계열 - 메인 포인트 컬러 (라이트 모드용 조정) */
+  --color-gold-50: #fefce8;
+  --color-gold-100: #fef9c3;
+  --color-gold-200: #fef08a;
+  --color-gold-300: #fde047;
+  --color-gold-400: #facc15;
+  --color-gold-500: #b8962e;
+  --color-gold-600: #a17c1a;
+  --color-gold-700: #854d0e;
+  --color-gold-800: #713f12;
+  --color-gold-900: #5c3d0e;
+
+  /* Light 배경 계열 */
+  --color-dark-950: #fafafa;
+  --color-dark-900: #f5f5f5;
+  --color-dark-800: #e5e5e5;
+  --color-dark-700: #d4d4d4;
+  --color-dark-600: #a3a3a3;
+  --color-dark-500: #737373;
+  --color-dark-400: #525252;
+  --color-dark-300: #404040;
+  --color-dark-200: #262626;
+  --color-dark-100: #171717;
+
+  /* Semantic Colors */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-info: #2563eb;
+
+  --radius: 0.5rem;
+
+  /* shadcn/ui 라이트 테마 */
+  --background: #fafafa;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #a17c1a;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #171717;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --accent: #f5f5f5;
+  --accent-foreground: #171717;
+  --destructive: #dc2626;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #a17c1a;
+
+  --chart-1: #a17c1a;
+  --chart-2: #b8962e;
+  --chart-3: #d4af37;
+  --chart-4: #facc15;
+  --chart-5: #fde047;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #171717;
+  --sidebar-primary: #a17c1a;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #a17c1a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: var(--font-playfair), 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-mono: 'DM Sans', 'SF Mono', monospace;
+
+  /* Gold Colors */
+  --color-gold-50: var(--color-gold-50);
+  --color-gold-100: var(--color-gold-100);
+  --color-gold-200: var(--color-gold-200);
+  --color-gold-300: var(--color-gold-300);
+  --color-gold-400: var(--color-gold-400);
+  --color-gold-500: var(--color-gold-500);
+  --color-gold-600: var(--color-gold-600);
+  --color-gold-700: var(--color-gold-700);
+  --color-gold-800: var(--color-gold-800);
+  --color-gold-900: var(--color-gold-900);
+
+  /* Dark Colors */
+  --color-dark-950: var(--color-dark-950);
+  --color-dark-900: var(--color-dark-900);
+  --color-dark-800: var(--color-dark-800);
+  --color-dark-700: var(--color-dark-700);
+  --color-dark-600: var(--color-dark-600);
+  --color-dark-500: var(--color-dark-500);
+  --color-dark-400: var(--color-dark-400);
+  --color-dark-300: var(--color-dark-300);
+  --color-dark-200: var(--color-dark-200);
+  --color-dark-100: var(--color-dark-100);
+
+  /* shadcn/ui theme tokens */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-dark-900 text-dark-100 antialiased;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  /* 라이트 테마 body 스타일 */
+  .light body {
+    @apply bg-dark-900 text-dark-100;
+  }
+
+  /* 스크롤바 스타일링 - 다크 테마 */
+  .dark ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-dark-900;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-dark-600 rounded-full;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-dark-500;
+  }
+
+  /* 스크롤바 스타일링 - 라이트 테마 */
+  .light ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .light ::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+
+  .light ::-webkit-scrollbar-thumb {
+    background: #d4d4d4;
+    border-radius: 9999px;
+  }
+
+  .light ::-webkit-scrollbar-thumb:hover {
+    background: #a3a3a3;
+  }
+}
+
+@layer components {
+  /* 버튼 컴포넌트 */
+  .btn-primary {
+    @apply bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600
+           hover:from-gold-500 hover:via-gold-400 hover:to-gold-500
+           text-dark-950 font-medium
+           px-6 py-3 rounded-lg
+           transition-all duration-300
+           shadow-lg shadow-gold-500/20
+           hover:shadow-xl hover:shadow-gold-500/30
+           focus:outline-none focus:ring-2 focus:ring-gold-500 focus:ring-offset-2 focus:ring-offset-dark-900;
+  }
+
+  .btn-secondary {
+    @apply border border-gold-500 text-gold-500
+           hover:bg-gold-500 hover:text-dark-950
+           font-medium px-6 py-3 rounded-lg
+           transition-all duration-300
+           focus:outline-none focus:ring-2 focus:ring-gold-500 focus:ring-offset-2 focus:ring-offset-dark-900;
+  }
+
+  .btn-ghost {
+    @apply text-dark-100 hover:text-gold-500
+           font-medium px-4 py-2
+           transition-colors duration-300
+           focus:outline-none focus:ring-2 focus:ring-gold-500 focus:ring-offset-2 focus:ring-offset-dark-900;
+  }
+
+  /* 카드 컴포넌트 */
+  .card {
+    @apply bg-dark-800 border border-dark-600 rounded-lg overflow-hidden
+           transition-all duration-300
+           hover:border-gold-500/30 hover:shadow-lg hover:shadow-gold-500/5;
+  }
+
+  /* 입력 필드 */
+  .input {
+    @apply w-full px-4 py-3
+           bg-dark-800 border border-dark-600 rounded-lg
+           text-white light:text-dark-100 placeholder-dark-400
+           transition-all duration-300
+           focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500;
+  }
+
+  /* 섹션 컨테이너 */
+  .section {
+    @apply py-16 md:py-24;
+  }
+
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 md:px-6 lg:px-8;
+  }
+
+  /* 섹션 타이틀 */
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-white light:text-dark-100 mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-gold-500 text-sm font-medium tracking-widest uppercase mb-2;
+  }
+
+  /* 네비게이션 링크 */
+  .nav-link {
+    @apply text-dark-100 hover:text-gold-500
+           font-medium text-sm tracking-wide
+           transition-colors duration-300
+           relative
+           after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5
+           after:bg-gold-500 after:transition-all after:duration-300
+           hover:after:w-full;
+  }
+
+  .nav-link.active {
+    @apply text-gold-500 after:w-full;
+  }
+}
+
+@layer utilities {
+  /* 텍스트 그라데이션 */
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400 bg-clip-text text-transparent;
+  }
+
+  /* 글래스모피즘 */
+  .glass {
+    @apply bg-dark-950/90 backdrop-blur-md;
+  }
+
+  /* 텍스트 밸런스 */
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* 애니메이션 키프레임 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* 애니메이션 유틸리티 */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+/* 애니메이션 딜레이 */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* Prose 스타일 - 게시글 본문 */
+.prose {
+  max-width: 65ch;
+  color: var(--color-dark-200);
+  line-height: 1.75;
+}
+
+.prose-invert {
+  color: var(--color-dark-100);
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: white;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.light .prose h1, .light .prose h2, .light .prose h3, .light .prose h4, .light .prose h5, .light .prose h6 {
+  color: var(--color-dark-100);
+}
+
+.prose h1 { font-size: 1.875rem; }
+.prose h2 { font-size: 1.5rem; }
+.prose h3 { font-size: 1.25rem; }
+.prose h4 { font-size: 1.125rem; }
+
+.prose p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+.prose a {
+  color: var(--color-gold-500);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  color: var(--color-gold-400);
+}
+
+.prose strong {
+  color: white;
+  font-weight: 600;
+}
+
+.light .prose strong {
+  color: var(--color-dark-100);
+}
+
+.prose ul, .prose ol {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--color-gold-500);
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+  color: var(--color-dark-300);
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5em 0;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--color-dark-700);
+  margin: 2em 0;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+
+.prose th, .prose td {
+  padding: 0.75em;
+  border: 1px solid var(--color-dark-700);
+  text-align: left;
+}
+
+.prose th {
+  background-color: var(--color-dark-800);
+  color: white;
+  font-weight: 600;
+}
+
+.light .prose th {
+  color: var(--color-dark-100);
+}
+
+.prose code {
+  background-color: var(--color-dark-800);
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose pre {
+  background-color: var(--color-dark-800);
+  padding: 1em;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.prose-gold a {
+  color: var(--color-gold-500);
+}
+
+.prose-gold a:hover {
+  color: var(--color-gold-400);
+}
+
+/* 스크롤바 숨김 유틸리티 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
