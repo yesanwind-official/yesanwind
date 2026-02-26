@@ -1,29 +1,52 @@
 import { Metadata } from 'next';
 import { Users, Music2, Drum, Wind } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: '조직도',
   description: '예산윈드오케스트라의 조직 구조와 파트별 구성을 소개합니다. 목관, 금관, 타악기 파트의 단원들을 만나보세요.',
 };
 
-// 조직 구조 데이터
-const organizationStructure = {
+interface LeadershipItem {
+  position: string;
+  name: string;
+  description: string;
+}
+
+interface StaffItem {
+  position: string;
+  name: string;
+  description: string;
+}
+
+interface InstrumentItem {
+  name: string;
+  count: number;
+  leader: string | null;
+}
+
+interface PartItem {
+  id: string;
+  name: string;
+  englishName: string;
+  color: string;
+  description: string;
+  totalMembers: number;
+  instruments: InstrumentItem[];
+}
+
+const iconMap: Record<string, typeof Wind> = {
+  woodwind: Wind,
+  brass: Music2,
+  percussion: Drum,
+};
+
+// Fallback data
+const fallbackOrganizationStructure = {
   leadership: [
-    {
-      position: '단장',
-      name: '박문화',
-      description: '오케스트라 운영 총괄',
-    },
-    {
-      position: '음악감독 겸 상임지휘자',
-      name: '김태혁',
-      description: '음악적 방향 및 지휘',
-    },
-    {
-      position: '부단장',
-      name: '이화음',
-      description: '단장 업무 보조 및 대외협력',
-    },
+    { position: '단장', name: '박문화', description: '오케스트라 운영 총괄' },
+    { position: '음악감독 겸 상임지휘자', name: '김태혁', description: '음악적 방향 및 지휘' },
+    { position: '부단장', name: '이화음', description: '단장 업무 보조 및 대외협력' },
   ],
   staff: [
     { position: '총무', name: '최관리', description: '행정 업무 총괄' },
@@ -33,14 +56,9 @@ const organizationStructure = {
   ],
 };
 
-// 파트별 구성 데이터
-const partsData = [
+const fallbackPartsData: PartItem[] = [
   {
-    id: 'woodwind',
-    name: '목관 파트',
-    englishName: 'Woodwind',
-    icon: Wind,
-    color: 'emerald',
+    id: 'woodwind', name: '목관 파트', englishName: 'Woodwind', color: 'emerald',
     description: '부드럽고 서정적인 음색으로 오케스트라의 멜로디를 이끌어가는 파트입니다.',
     instruments: [
       { name: '플루트 (Flute)', count: 6, leader: '김선율' },
@@ -54,11 +72,7 @@ const partsData = [
     totalMembers: 27,
   },
   {
-    id: 'brass',
-    name: '금관 파트',
-    englishName: 'Brass',
-    icon: Music2,
-    color: 'amber',
+    id: 'brass', name: '금관 파트', englishName: 'Brass', color: 'amber',
     description: '웅장하고 화려한 사운드로 오케스트라의 힘과 깊이를 더하는 파트입니다.',
     instruments: [
       { name: '호른 (Horn)', count: 4, leader: '송둥근' },
@@ -71,11 +85,7 @@ const partsData = [
     totalMembers: 19,
   },
   {
-    id: 'percussion',
-    name: '타악기 파트',
-    englishName: 'Percussion',
-    icon: Drum,
-    color: 'rose',
+    id: 'percussion', name: '타악기 파트', englishName: 'Percussion', color: 'rose',
     description: '리듬과 악센트로 음악에 생동감을 불어넣는 파트입니다.',
     instruments: [
       { name: '팀파니 (Timpani)', count: 1, leader: '배리듬' },
@@ -88,6 +98,39 @@ const partsData = [
     totalMembers: 9,
   },
 ];
+
+async function getOrganizationData() {
+  try {
+    const supabase = await createClient();
+    if (!supabase) return { organizationStructure: fallbackOrganizationStructure, partsData: fallbackPartsData };
+
+    const { data, error } = await supabase
+      .from('orchestra_info')
+      .select('metadata')
+      .eq('key', 'organization')
+      .single();
+
+    if (error || !data?.metadata) return { organizationStructure: fallbackOrganizationStructure, partsData: fallbackPartsData };
+
+    const meta = data.metadata as unknown as {
+      leadership?: LeadershipItem[];
+      staff?: StaffItem[];
+      parts?: PartItem[];
+    };
+
+    if (!meta.leadership || !meta.parts) return { organizationStructure: fallbackOrganizationStructure, partsData: fallbackPartsData };
+
+    return {
+      organizationStructure: {
+        leadership: meta.leadership,
+        staff: meta.staff || fallbackOrganizationStructure.staff,
+      },
+      partsData: meta.parts,
+    };
+  } catch {
+    return { organizationStructure: fallbackOrganizationStructure, partsData: fallbackPartsData };
+  }
+}
 
 const colorClasses = {
   emerald: {
@@ -110,7 +153,9 @@ const colorClasses = {
   },
 };
 
-export default function OrganizationPage() {
+export default async function OrganizationPage() {
+  const { organizationStructure, partsData } = await getOrganizationData();
+
   return (
     <div className="space-y-16">
       {/* Leadership Structure */}
@@ -187,7 +232,7 @@ export default function OrganizationPage() {
         <div className="space-y-8">
           {partsData.map((part) => {
             const colors = colorClasses[part.color as keyof typeof colorClasses];
-            const IconComponent = part.icon;
+            const IconComponent = iconMap[part.id] || Music2;
 
             return (
               <div
@@ -260,17 +305,17 @@ export default function OrganizationPage() {
           </div>
           <div className="flex items-center gap-8">
             <div className="text-center">
-              <span className="text-4xl font-bold text-gold-500">55</span>
+              <span className="text-4xl font-bold text-gold-500">{partsData.reduce((sum, p) => sum + p.totalMembers, 0)}</span>
               <span className="text-dark-300 text-sm block">총 단원수</span>
             </div>
             <div className="w-px h-12 bg-dark-700" />
             <div className="text-center">
-              <span className="text-4xl font-bold text-gold-500">3</span>
+              <span className="text-4xl font-bold text-gold-500">{partsData.length}</span>
               <span className="text-dark-300 text-sm block">파트</span>
             </div>
             <div className="w-px h-12 bg-dark-700" />
             <div className="text-center">
-              <span className="text-4xl font-bold text-gold-500">19</span>
+              <span className="text-4xl font-bold text-gold-500">{partsData.reduce((sum, p) => sum + p.instruments.length, 0)}</span>
               <span className="text-dark-300 text-sm block">악기 종류</span>
             </div>
           </div>

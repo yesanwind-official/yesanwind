@@ -421,6 +421,7 @@ export interface Database {
           year: number;
           month: number | null;
           content: string;
+          highlight: boolean;
           display_order: number;
           created_at: string;
           updated_at: string;
@@ -430,6 +431,7 @@ export interface Database {
           year: number;
           month?: number | null;
           content: string;
+          highlight?: boolean;
           display_order?: number;
           created_at?: string;
           updated_at?: string;
@@ -439,6 +441,7 @@ export interface Database {
           year?: number;
           month?: number | null;
           content?: string;
+          highlight?: boolean;
           display_order?: number;
           created_at?: string;
           updated_at?: string;

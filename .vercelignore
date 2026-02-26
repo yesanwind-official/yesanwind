@@ -1,0 +1,22 @@
+# Large video files - served from Supabase Storage instead
+public/videos/
+
+# npm cache (accidentally created in project root on Windows)
+%LOCALAPPDATA%/
+
+# Claude Code / Playwright MCP
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# Screenshots
+*.png
+
+# Supabase temp
+supabase/.temp/
+
+# Test files
+tests/
+
+# Misc
+nul

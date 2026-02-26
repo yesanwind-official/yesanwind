@@ -10,6 +10,7 @@ import {
   Users,
   FileText,
   Image,
+  Info,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -30,6 +31,7 @@ const navItems: NavItem[] = [
   { name: '단원 관리', href: '/admin/members', icon: Users },
   { name: '게시판 관리', href: '/admin/posts', icon: FileText },
   { name: '갤러리 관리', href: '/admin/gallery', icon: Image },
+  { name: '소개 관리', href: '/admin/about', icon: Info },
   { name: '사이트 설정', href: '/admin/settings', icon: Settings },
 ];
 

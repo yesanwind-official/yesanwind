@@ -1,18 +1,17 @@
 import { Metadata } from 'next';
-import Image from 'next/image';
 import { Quote } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: '인사말',
   description: '예산윈드오케스트라 단장 및 지휘자 인사말. 음악으로 하나되는 예산을 위해 노력하는 예산윈드오케스트라를 소개합니다.',
 };
 
-// Mock Data
-const greetingData = {
+// Fallback Mock Data
+const fallbackGreetingData = {
   conductor: {
     name: '김태혁',
     title: '음악감독 겸 상임지휘자',
-    image: '/images/conductor.jpg',
     greeting: `안녕하십니까, 예산윈드오케스트라 음악감독 겸 상임지휘자 김태혁입니다.
 
 예산윈드오케스트라 홈페이지를 방문해 주신 여러분께 진심으로 감사의 말씀을 드립니다.
@@ -30,7 +29,6 @@ const greetingData = {
   president: {
     name: '박문화',
     title: '단장',
-    image: '/images/president.jpg',
     greeting: `존경하는 시민 여러분, 안녕하십니까.
 예산윈드오케스트라 단장 박문화입니다.
 
@@ -48,11 +46,40 @@ const greetingData = {
   },
 };
 
+interface GreetingPerson {
+  name: string;
+  title: string;
+  greeting: string;
+  signature: string;
+}
+
+async function getGreetingData(): Promise<{ conductor: GreetingPerson; president: GreetingPerson }> {
+  try {
+    const supabase = await createClient();
+    if (!supabase) return fallbackGreetingData;
+
+    const { data, error } = await supabase
+      .from('orchestra_info')
+      .select('metadata')
+      .eq('key', 'greeting')
+      .single();
+
+    if (error || !data?.metadata) return fallbackGreetingData;
+
+    const meta = data.metadata as unknown as { conductor?: GreetingPerson; president?: GreetingPerson };
+    if (!meta.conductor?.name || !meta.president?.name) return fallbackGreetingData;
+
+    return { conductor: meta.conductor, president: meta.president };
+  } catch {
+    return fallbackGreetingData;
+  }
+}
+
 function ProfileCard({
   person,
   isReversed = false,
 }: {
-  person: typeof greetingData.conductor;
+  person: GreetingPerson;
   isReversed?: boolean;
 }) {
   return (
@@ -126,7 +153,9 @@ function ProfileCard({
   );
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const greetingData = await getGreetingData();
+
   return (
     <div className="space-y-20 lg:space-y-32">
       {/* Conductor Greeting */}

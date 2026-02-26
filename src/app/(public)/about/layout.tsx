@@ -8,7 +8,6 @@ const subNavigation = [
   { name: '인사말', href: '/about' },
   { name: '연혁', href: '/about/history' },
   { name: '조직도', href: '/about/organization' },
-  { name: '오시는 길', href: '/about/location' },
 ];
 
 interface PageHeaderProps {
@@ -104,11 +103,6 @@ const pageTitles: Record<string, PageHeaderProps> = {
     title: '조직도',
     subtitle: '예산윈드오케스트라의 구성원과 조직 구조를 소개합니다',
     englishTitle: 'Organization',
-  },
-  '/about/location': {
-    title: '오시는 길',
-    subtitle: '예산윈드오케스트라 연습실 및 공연장 안내',
-    englishTitle: 'Location',
   },
 };
 

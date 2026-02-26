@@ -1,185 +1,140 @@
 import { Metadata } from 'next';
 import { Calendar, Award, Users, Music, Star, Building } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: '연혁',
   description: '1998년 창단 이래 27년간 지역 문화 발전에 기여해온 예산윈드오케스트라의 발자취를 소개합니다.',
 };
 
-// Mock Data - 연혁 데이터
-const historyData = [
+interface HistoryEvent {
+  date: string;
+  title: string;
+  description: string;
+  icon: typeof Music;
+  highlight?: boolean;
+}
+
+interface YearGroup {
+  year: string;
+  events: HistoryEvent[];
+}
+
+function pickIcon(content: string) {
+  if (content.includes('수상') || content.includes('기념') || content.includes('금상')) return Award;
+  if (content.includes('단원') || content.includes('교실') || content.includes('영입')) return Users;
+  if (content.includes('연습실') || content.includes('방문') || content.includes('학교')) return Building;
+  if (content.includes('축제') || content.includes('교류') || content.includes('창단')) return Star;
+  if (content.includes('중단') || content.includes('잠정')) return Calendar;
+  return Music;
+}
+
+async function getHistoryData(): Promise<YearGroup[]> {
+  try {
+    const supabase = await createClient();
+    if (!supabase) return fallbackHistoryData;
+
+    const { data, error } = await supabase
+      .from('history_items')
+      .select('*')
+      .order('year', { ascending: false })
+      .order('month', { ascending: false });
+
+    if (error || !data || data.length === 0) return fallbackHistoryData;
+
+    // Group by year
+    const grouped = new Map<string, HistoryEvent[]>();
+    for (const item of data) {
+      const yearKey = String(item.year);
+      const dateStr = item.month ? `${item.year}.${String(item.month).padStart(2, '0')}` : String(item.year);
+      // Split content into title and description on " - "
+      const parts = item.content.split(' - ');
+      const title = parts[0];
+      const description = parts.length > 1 ? parts.slice(1).join(' - ') : '';
+
+      const event: HistoryEvent = {
+        date: dateStr,
+        title,
+        description,
+        icon: pickIcon(item.content),
+        highlight: item.highlight,
+      };
+
+      if (!grouped.has(yearKey)) grouped.set(yearKey, []);
+      grouped.get(yearKey)!.push(event);
+    }
+
+    return Array.from(grouped.entries()).map(([year, events]) => ({ year, events }));
+  } catch {
+    return fallbackHistoryData;
+  }
+}
+
+// Fallback Mock Data
+const fallbackHistoryData: YearGroup[] = [
   {
     year: '2024',
     events: [
-      {
-        date: '2024.11',
-        title: '제46회 정기연주회',
-        description: '예산문화예술회관 대공연장에서 성황리에 개최',
-        icon: Music,
-        highlight: true,
-      },
-      {
-        date: '2024.06',
-        title: '제45회 정기연주회',
-        description: '여름밤의 세레나데',
-        icon: Music,
-      },
-      {
-        date: '2024.03',
-        title: '지역 축제 초청 공연',
-        description: '예산 봄꽃축제 개막식 축하공연',
-        icon: Star,
-      },
+      { date: '2024.11', title: '제46회 정기연주회', description: '예산문화예술회관 대공연장에서 성황리에 개최', icon: Music, highlight: true },
+      { date: '2024.06', title: '제45회 정기연주회', description: '여름밤의 세레나데', icon: Music },
+      { date: '2024.03', title: '지역 축제 초청 공연', description: '예산 봄꽃축제 개막식 축하공연', icon: Star },
     ],
   },
   {
     year: '2023',
     events: [
-      {
-        date: '2023.12',
-        title: '창단 25주년 기념 특별연주회',
-        description: '지역 예술가 및 동문 연주자와 함께한 특별 무대',
-        icon: Award,
-        highlight: true,
-      },
-      {
-        date: '2023.10',
-        title: '충남 관악 페스티벌 대상 수상',
-        description: '충청남도 관악 합주 경연대회 대상',
-        icon: Award,
-        highlight: true,
-      },
-      {
-        date: '2023.05',
-        title: '학교 방문 연주회',
-        description: '예산군 관내 초등학교 10개교 순회 연주',
-        icon: Building,
-      },
+      { date: '2023.12', title: '창단 25주년 기념 특별연주회', description: '지역 예술가 및 동문 연주자와 함께한 특별 무대', icon: Award, highlight: true },
+      { date: '2023.10', title: '충남 관악 페스티벌 대상 수상', description: '충청남도 관악 합주 경연대회 대상', icon: Award, highlight: true },
+      { date: '2023.05', title: '학교 방문 연주회', description: '예산군 관내 초등학교 10개교 순회 연주', icon: Building },
     ],
   },
   {
     year: '2022',
     events: [
-      {
-        date: '2022.11',
-        title: '제42회 정기연주회',
-        description: '코로나19 이후 첫 전면 대면 공연',
-        icon: Music,
-        highlight: true,
-      },
-      {
-        date: '2022.08',
-        title: '신규 단원 20명 영입',
-        description: '청년층 단원 대거 합류로 세대 교체 활발',
-        icon: Users,
-      },
+      { date: '2022.11', title: '제42회 정기연주회', description: '코로나19 이후 첫 전면 대면 공연', icon: Music, highlight: true },
+      { date: '2022.08', title: '신규 단원 20명 영입', description: '청년층 단원 대거 합류로 세대 교체 활발', icon: Users },
     ],
   },
   {
     year: '2020-2021',
     events: [
-      {
-        date: '2021.06',
-        title: '온라인 연주회 개최',
-        description: '비대면 시대, 유튜브 라이브 스트리밍 연주회 진행',
-        icon: Music,
-      },
-      {
-        date: '2020.03',
-        title: '코로나19로 인한 공연 잠정 중단',
-        description: '온라인 합주 연습으로 단원 유대 유지',
-        icon: Calendar,
-      },
+      { date: '2021.06', title: '온라인 연주회 개최', description: '비대면 시대, 유튜브 라이브 스트리밍 연주회 진행', icon: Music },
+      { date: '2020.03', title: '코로나19로 인한 공연 잠정 중단', description: '온라인 합주 연습으로 단원 유대 유지', icon: Calendar },
     ],
   },
   {
     year: '2018',
     events: [
-      {
-        date: '2018.11',
-        title: '창단 20주년 기념연주회',
-        description: '예산문화예술회관 대공연장 전석 매진',
-        icon: Award,
-        highlight: true,
-      },
-      {
-        date: '2018.05',
-        title: '해외 교류 연주회',
-        description: '일본 치바현 관악 오케스트라와 교류 공연',
-        icon: Star,
-      },
+      { date: '2018.11', title: '창단 20주년 기념연주회', description: '예산문화예술회관 대공연장 전석 매진', icon: Award, highlight: true },
+      { date: '2018.05', title: '해외 교류 연주회', description: '일본 치바현 관악 오케스트라와 교류 공연', icon: Star },
     ],
   },
   {
     year: '2015',
     events: [
-      {
-        date: '2015.09',
-        title: '전국 관악 합주 경연대회 금상',
-        description: '전국 규모 대회 첫 금상 수상',
-        icon: Award,
-        highlight: true,
-      },
-      {
-        date: '2015.04',
-        title: '신규 연습실 이전',
-        description: '예산문화예술회관 내 전용 연습실 확보',
-        icon: Building,
-      },
+      { date: '2015.09', title: '전국 관악 합주 경연대회 금상', description: '전국 규모 대회 첫 금상 수상', icon: Award, highlight: true },
+      { date: '2015.04', title: '신규 연습실 이전', description: '예산문화예술회관 내 전용 연습실 확보', icon: Building },
     ],
   },
   {
     year: '2010',
     events: [
-      {
-        date: '2010.11',
-        title: '제20회 정기연주회',
-        description: '창단 이래 20회 정기연주회 달성',
-        icon: Music,
-      },
-      {
-        date: '2010.06',
-        title: '단원 50명 돌파',
-        description: '지역 최대 규모 관악 오케스트라로 성장',
-        icon: Users,
-        highlight: true,
-      },
+      { date: '2010.11', title: '제20회 정기연주회', description: '창단 이래 20회 정기연주회 달성', icon: Music },
+      { date: '2010.06', title: '단원 50명 돌파', description: '지역 최대 규모 관악 오케스트라로 성장', icon: Users, highlight: true },
     ],
   },
   {
     year: '2005',
     events: [
-      {
-        date: '2005.12',
-        title: '예산군 문화예술 공로상 수상',
-        description: '지역 문화 발전 기여 공로 인정',
-        icon: Award,
-      },
-      {
-        date: '2005.03',
-        title: '청소년 관악 교실 개설',
-        description: '지역 청소년 대상 관악기 교육 프로그램 시작',
-        icon: Users,
-      },
+      { date: '2005.12', title: '예산군 문화예술 공로상 수상', description: '지역 문화 발전 기여 공로 인정', icon: Award },
+      { date: '2005.03', title: '청소년 관악 교실 개설', description: '지역 청소년 대상 관악기 교육 프로그램 시작', icon: Users },
     ],
   },
   {
     year: '1998',
     events: [
-      {
-        date: '1998.09',
-        title: '제1회 창단 연주회',
-        description: '예산군민회관에서 200여 명 관객과 함께한 첫 무대',
-        icon: Music,
-        highlight: true,
-      },
-      {
-        date: '1998.03',
-        title: '예산윈드오케스트라 창단',
-        description: '지역 음악인 15명이 모여 창단',
-        icon: Star,
-        highlight: true,
-      },
+      { date: '1998.09', title: '제1회 창단 연주회', description: '예산군민회관에서 200여 명 관객과 함께한 첫 무대', icon: Music, highlight: true },
+      { date: '1998.03', title: '예산윈드오케스트라 창단', description: '지역 음악인 15명이 모여 창단', icon: Star, highlight: true },
     ],
   },
 ];
@@ -192,7 +147,9 @@ const milestones = [
   { value: '10+', label: '수상 경력' },
 ];
 
-export default function HistoryPage() {
+export default async function HistoryPage() {
+  const historyData = await getHistoryData();
+
   return (
     <div className="space-y-12">
       {/* Milestone Stats */}
