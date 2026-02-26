@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MemberCard } from '@/components/features/members';
-import { percussionMembers, instrumentGroups, groupMembersByInstrument } from '@/data/members';
+import { instrumentGroups, groupMembersByInstrument } from '@/data/members';
+import { getMembersByPart } from '@/lib/members';
+import { toUIMember } from '@/lib/member-helpers';
 import { ArrowLeft, Drum } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -9,7 +11,9 @@ export const metadata: Metadata = {
   description: '예산윈드오케스트라 타악기 파트 단원들을 소개합니다. 팀파니, 스네어 드럼, 마림바, 실로폰 등.',
 };
 
-export default function PercussionPage() {
+export default async function PercussionPage() {
+  const dbMembers = await getMembersByPart('percussion');
+  const percussionMembers = dbMembers.map(toUIMember);
   const groupedMembers = groupMembersByInstrument(percussionMembers);
 
   // 악기 그룹 순서

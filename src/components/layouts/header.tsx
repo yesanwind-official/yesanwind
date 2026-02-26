@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogIn, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Sheet,
@@ -13,6 +14,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme';
+import { getClient } from '@/lib/supabase/client';
 
 const navigation = [
   { name: '홈', href: '/' },
@@ -26,6 +28,7 @@ const navigation = [
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const pathname = usePathname();
 
   // 스크롤 감지
@@ -36,6 +39,21 @@ export function Header() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 로그인 상태 감지
+  useEffect(() => {
+    const supabase = getClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsAdmin(!!user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAdmin(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const isHomePage = pathname === '/';
@@ -57,23 +75,13 @@ export function Header() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 lg:gap-3 group">
-            {/* Logo Icon - 음표/악기 심볼 */}
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg opacity-20 group-hover:opacity-30 transition-opacity" />
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="w-6 h-6 text-gold-500"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                />
-              </svg>
-            </div>
+            <Image
+              src="/images/logo.png"
+              alt="예산윈드오케스트라"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain"
+            />
             <div className="flex flex-col">
               <span className="font-serif text-lg lg:text-xl font-bold tracking-wide text-white light:text-dark-100 group-hover:text-gold-400 transition-colors">
                 YESAN WIND
@@ -103,9 +111,26 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
-            {/* Theme Toggle */}
-            <div className="ml-2 pl-2 border-l border-dark-700">
+            {/* Theme Toggle + Login/Admin */}
+            <div className="ml-2 pl-2 border-l border-dark-700 flex items-center gap-1">
               <ThemeToggle />
+              {isAdmin ? (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gold-500 hover:text-gold-400 transition-colors"
+                >
+                  <Shield className="w-4 h-4" />
+                  관리자
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-dark-200 hover:text-gold-500 transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  로그인
+                </Link>
+              )}
             </div>
           </div>
 
@@ -138,21 +163,13 @@ export function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center gap-3"
                   >
-                    <div className="w-10 h-10 flex items-center justify-center bg-gold-500/10 rounded-lg">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="w-6 h-6 text-gold-500"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                        />
-                      </svg>
-                    </div>
+                    <Image
+                      src="/images/logo.png"
+                      alt="예산윈드오케스트라"
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 object-contain"
+                    />
                     <div>
                       <span className="block font-serif text-lg font-bold text-white light:text-dark-100">
                         YESAN WIND
@@ -189,6 +206,25 @@ export function Header() {
 
               {/* Mobile Menu Footer */}
               <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-dark-700 bg-dark-950">
+                {isAdmin ? (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-2.5 mb-4 rounded-lg bg-gold-500/10 text-gold-500 hover:bg-gold-500/20 font-medium text-sm transition-colors"
+                  >
+                    <Shield className="w-4 h-4" />
+                    관리자 페이지
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-2.5 mb-4 rounded-lg bg-gold-500/10 text-gold-500 hover:bg-gold-500/20 font-medium text-sm transition-colors"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    관리자 로그인
+                  </Link>
+                )}
                 <div className="space-y-3">
                   <p className="text-dark-400 text-sm">연락처</p>
                   <p className="text-white light:text-dark-100 font-medium">041-123-4567</p>

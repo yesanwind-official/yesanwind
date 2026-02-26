@@ -277,13 +277,25 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Background Image */}
+          {/* Background Video */}
           <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-dark-950/40 via-dark-950/60 to-dark-950/90 dark:from-dark-950/40 dark:via-dark-950/60 dark:to-dark-950/90 light:from-white/60 light:via-white/70 light:to-white/90 z-10" />
-            {/* Placeholder for background image */}
-            <div className="w-full h-full bg-dark-800 dark:bg-dark-800 light:bg-dark-300">
-              {/* 실제 이미지가 있으면 Image 컴포넌트 사용 */}
-              <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center bg-no-repeat opacity-60 dark:opacity-60 light:opacity-40" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/40 via-[#0a0a0a]/60 to-[#0a0a0a]/90 z-10" />
+            {/* Video Background */}
+            <div className="w-full h-full bg-[#1a1a1a]">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/images/orchestra-group.jpg"
+                className="absolute inset-0 w-full h-full object-cover opacity-60"
+              >
+                <source src="/videos/hero-bg.mp4" type="video/mp4" />
+                <source src="/videos/hero-bg.webm" type="video/webm" />
+                {/* 비디오 로드 실패 시 이미지 폴백 */}
+              </video>
+              {/* 비디오 미지원 브라우저용 이미지 폴백 */}
+              <div className="absolute inset-0 bg-[url('/images/orchestra-group.jpg')] bg-cover bg-center bg-no-repeat opacity-60 -z-10" />
             </div>
           </div>
 
@@ -294,13 +306,13 @@ export default function HomePage() {
               <span className="block font-serif text-5xl md:text-6xl lg:text-7xl font-bold tracking-wide leading-tight text-gradient-gold">
                 YESAN WIND
               </span>
-              <span className="block font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white dark:text-white light:text-dark-800 tracking-wider mt-2 opacity-0 animate-fade-in-up delay-100">
+              <span className="block font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-wider mt-2 opacity-0 animate-fade-in-up delay-100">
                 ORCHESTRA
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg md:text-xl text-dark-200 dark:text-dark-200 light:text-dark-400 mt-6 leading-relaxed opacity-0 animate-fade-in-up delay-200">
+            <p className="text-lg md:text-xl text-white/80 mt-6 leading-relaxed opacity-0 animate-fade-in-up delay-200">
               음악으로 하나되는 예산,
               <br className="md:hidden" />
               예산윈드오케스트라가 함께합니다
@@ -351,11 +363,19 @@ export default function HomePage() {
                     className="group bg-dark-800 border border-dark-600 rounded-lg overflow-hidden transition-all duration-300 hover:border-gold-500/30 hover:shadow-lg hover:shadow-gold-500/5"
                   >
                     {/* Poster Image */}
-                    <div className="relative aspect-[3/4] overflow-hidden bg-dark-700">
-                      {/* Placeholder */}
-                      <div className="absolute inset-0 flex items-center justify-center text-dark-500">
-                        <Calendar className="w-16 h-16" />
-                      </div>
+                    <div className="relative aspect-[3/4] overflow-hidden bg-dark-700 light:bg-gray-100">
+                      {concert.poster_image ? (
+                        <Image
+                          src={concert.poster_image}
+                          alt={`${concert.title} 포스터`}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-dark-500 light:text-dark-400">
+                          <Calendar className="w-16 h-16" />
+                        </div>
+                      )}
 
                       {/* Date Badge */}
                       <div className="absolute top-4 left-4 bg-gold-500 text-dark-950 px-3 py-1.5 rounded text-sm font-semibold">
@@ -423,23 +443,13 @@ export default function HomePage() {
                 {/* Decorative Frame */}
                 <div className="absolute -inset-4 border border-gold-500/20 rounded-lg -z-10" />
 
-                <div className="aspect-[4/3] rounded-lg overflow-hidden bg-dark-700">
-                  {/* Placeholder */}
-                  <div className="w-full h-full flex items-center justify-center text-dark-500">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="w-24 h-24"
-                      stroke="currentColor"
-                      strokeWidth="1"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                      />
-                    </svg>
-                  </div>
+                <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-dark-700">
+                  <Image
+                    src="/images/orchestra-group.jpg"
+                    alt="예산윈드오케스트라 단체 사진"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
 
                 {/* Corner Decoration */}
@@ -515,11 +525,20 @@ export default function HomePage() {
               <div className="col-span-2 row-span-2">
                 <Link
                   href={`/gallery/${galleryImages[0].id}`}
-                  className="group block relative aspect-[4/3] md:aspect-auto md:h-full rounded-lg overflow-hidden bg-dark-800"
+                  className="group block relative aspect-[4/3] md:aspect-auto md:h-full rounded-lg overflow-hidden bg-dark-800 light:bg-gray-100"
                 >
-                  <div className="absolute inset-0 flex items-center justify-center text-dark-500">
-                    <Calendar className="w-16 h-16" />
-                  </div>
+                  {galleryImages[0].images[0]?.url ? (
+                    <Image
+                      src={galleryImages[0].images[0].url}
+                      alt={galleryImages[0].title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-dark-500 light:text-dark-400">
+                      <Calendar className="w-16 h-16" />
+                    </div>
+                  )}
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-dark-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div className="text-center">
@@ -535,11 +554,20 @@ export default function HomePage() {
                 <div key={gallery.id}>
                   <Link
                     href={`/gallery/${gallery.id}`}
-                    className="group block relative aspect-square rounded-lg overflow-hidden bg-dark-800"
+                    className="group block relative aspect-square rounded-lg overflow-hidden bg-dark-800 light:bg-gray-100"
                   >
-                    <div className="absolute inset-0 flex items-center justify-center text-dark-600">
-                      <Calendar className="w-8 h-8" />
-                    </div>
+                    {gallery.images[0]?.url ? (
+                      <Image
+                        src={gallery.images[0].url}
+                        alt={gallery.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-dark-600 light:text-dark-400">
+                        <Calendar className="w-8 h-8" />
+                      </div>
+                    )}
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-dark-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <ZoomIn className="w-8 h-8 text-gold-500" />

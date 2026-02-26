@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MemberCard } from '@/components/features/members';
-import { woodwindMembers, instrumentGroups, groupMembersByInstrument } from '@/data/members';
+import { instrumentGroups, groupMembersByInstrument } from '@/data/members';
+import { getMembersByPart } from '@/lib/members';
+import { toUIMember } from '@/lib/member-helpers';
 import { ArrowLeft, Music } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -9,7 +11,9 @@ export const metadata: Metadata = {
   description: '예산윈드오케스트라 목관 파트 단원들을 소개합니다. 플루트, 오보에, 클라리넷, 바순, 색소폰 등.',
 };
 
-export default function WoodwindPage() {
+export default async function WoodwindPage() {
+  const dbMembers = await getMembersByPart('woodwind');
+  const woodwindMembers = dbMembers.map(toUIMember);
   const groupedMembers = groupMembersByInstrument(woodwindMembers);
 
   // 악기 그룹 순서

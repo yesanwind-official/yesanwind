@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { MapPin, Phone, Mail } from 'lucide-react';
 
 const footerNavigation = {
@@ -50,25 +51,17 @@ export function Footer() {
     <footer className="bg-dark-950 border-t border-dark-700">
       {/* Main Footer Content */}
       <div className="container-custom py-12 lg:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 max-w-4xl mx-auto lg:max-w-none lg:justify-items-center">
           {/* Logo & Description */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 flex items-center justify-center bg-gold-500/10 rounded-lg">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="w-6 h-6 text-gold-500"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                  />
-                </svg>
-              </div>
+              <Image
+                src="/images/logo.png"
+                alt="예산윈드오케스트라"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-contain"
+              />
               <span className="font-serif text-xl font-bold tracking-wide text-white light:text-dark-100">
                 YESAN WIND
               </span>
@@ -140,28 +133,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Newsletter / Additional Info */}
-          <div>
-            <h3 className="text-white light:text-dark-100 font-semibold mb-4">공연 안내 받기</h3>
-            <p className="text-dark-300 text-sm mb-4">
-              새로운 공연 소식과 오케스트라 활동을
-              <br />
-              이메일로 받아보세요.
-            </p>
-            <form className="space-y-3">
-              <input
-                type="email"
-                placeholder="이메일 주소"
-                className="w-full px-4 py-2.5 bg-dark-800 border border-dark-600 rounded-lg text-white light:text-dark-100 placeholder-dark-400 text-sm transition-all duration-300 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500"
-              />
-              <button
-                type="submit"
-                className="w-full px-4 py-2.5 bg-gold-500 hover:bg-gold-400 text-dark-950 font-medium text-sm rounded-lg transition-colors duration-300"
-              >
-                구독하기
-              </button>
-            </form>
-          </div>
         </div>
       </div>
 

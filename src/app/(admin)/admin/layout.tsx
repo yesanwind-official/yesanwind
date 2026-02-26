@@ -13,7 +13,7 @@ export default function AdminLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-neutral-100">
+    <div className="min-h-screen bg-background">
       {/* Sidebar - Desktop */}
       <div className="hidden md:block">
         <AdminSidebar
@@ -23,20 +23,24 @@ export default function AdminLayout({
       </div>
 
       {/* Sidebar - Mobile (overlay) */}
-      {mobileMenuOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/50 md:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <div className="md:hidden">
-            <AdminSidebar
-              isCollapsed={false}
-              onToggle={() => setMobileMenuOpen(false)}
-            />
-          </div>
-        </>
-      )}
+      <div
+        className={cn(
+          'fixed inset-0 z-40 bg-black/50 md:hidden transition-opacity duration-300',
+          mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        )}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+      <div
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-64 md:hidden transition-transform duration-300 ease-in-out [&_aside]:!relative [&_aside]:!inset-auto [&_aside]:!h-full [&_aside]:!w-full',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <AdminSidebar
+          isCollapsed={false}
+          onToggle={() => setMobileMenuOpen(false)}
+        />
+      </div>
 
       {/* Main content */}
       <div
@@ -48,7 +52,7 @@ export default function AdminLayout({
         <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
 
         <main className="flex-1 p-4 md:p-6">
-          <div className="mx-auto max-w-7xl">{children}</div>
+          {children}
         </main>
       </div>
     </div>

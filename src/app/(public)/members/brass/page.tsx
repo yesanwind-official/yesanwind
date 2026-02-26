@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MemberCard } from '@/components/features/members';
-import { brassMembers, instrumentGroups, groupMembersByInstrument } from '@/data/members';
+import { instrumentGroups, groupMembersByInstrument } from '@/data/members';
+import { getMembersByPart } from '@/lib/members';
+import { toUIMember } from '@/lib/member-helpers';
 import { ArrowLeft, Music } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -9,7 +11,9 @@ export const metadata: Metadata = {
   description: '예산윈드오케스트라 금관 파트 단원들을 소개합니다. 호른, 트럼펫, 트롬본, 유포니움, 튜바 등.',
 };
 
-export default function BrassPage() {
+export default async function BrassPage() {
+  const dbMembers = await getMembersByPart('brass');
+  const brassMembers = dbMembers.map(toUIMember);
   const groupedMembers = groupMembersByInstrument(brassMembers);
 
   // 악기 그룹 순서

@@ -128,7 +128,7 @@ Height: 64px (h-16)
 
       <!-- 로고 -->
       <a href="/" class="flex items-center gap-2 lg:gap-3">
-        <img src="/images/logo.svg" alt="" class="h-8 lg:h-10 w-auto" />
+        <img src="/images/logo.png" alt="" class="h-8 lg:h-10 w-auto" />
         <span class="text-white font-serif text-lg lg:text-xl tracking-wide">
           YESAN WIND
         </span>
@@ -283,7 +283,7 @@ window.addEventListener('scroll', () => {
       <!-- 로고 & 소개 -->
       <div class="lg:col-span-1">
         <a href="/" class="flex items-center gap-2 mb-4">
-          <img src="/images/logo.svg" alt="" class="h-10 w-auto" />
+          <img src="/images/logo.png" alt="" class="h-10 w-auto" />
           <span class="text-white font-serif text-xl tracking-wide">YESAN WIND</span>
         </a>
         <p class="text-dark-300 text-sm leading-relaxed">

@@ -42,3 +42,21 @@ next-env.d.ts
 
 # Large files
 public/images/예산윈드*배너.png
+
+.vercel
+.env*.local
+
+# claude code
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# screenshots & temp files (root level only)
+/*.png
+nul
+
+# local app data
+%LOCALAPPDATA%/
+
+# supabase temp
+supabase/.temp/

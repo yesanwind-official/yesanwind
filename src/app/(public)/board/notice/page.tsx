@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import { getNotices, getTotalPages, notices } from '@/data/posts';
+import { getNotices, getTotalPages } from '@/lib/posts';
+import { toUIPost } from '@/lib/post-helpers';
 import { PostListItem, Pagination } from '@/components/features/board';
 
 export const metadata: Metadata = {
@@ -15,18 +16,18 @@ export default async function NoticePage({ searchParams }: NoticePageProps) {
   const params = await searchParams;
   const currentPage = Number(params.page) || 1;
   const limit = 10;
-  const totalPages = getTotalPages('notice', limit);
-  const posts = getNotices({ page: currentPage, limit, pinnedFirst: true });
+  const totalPages = await getTotalPages('notice', limit);
+  const { posts: dbPosts, total } = await getNotices({ page: currentPage, limit, pinnedFirst: true });
 
-  // 전체 게시글 수 계산 (고정 공지 제외한 번호 계산용)
-  const totalNotices = notices.length;
-  const pinnedCount = notices.filter((n) => n.isPinned).length;
+  const posts = dbPosts.map(toUIPost);
 
-  // 번호 계산 함수
+  // 번호 계산: 고정글은 0, 나머지는 역순 번호
+  const pinnedCount = dbPosts.filter((p) => p.is_pinned).length;
+
   const getPostNumber = (index: number, isPinned: boolean) => {
-    if (isPinned) return 0; // 고정 글은 번호 대신 아이콘 표시
-    const nonPinnedIndex = index - (posts.slice(0, index).filter((p) => p.isPinned).length);
-    return totalNotices - pinnedCount - ((currentPage - 1) * limit) - nonPinnedIndex;
+    if (isPinned) return 0;
+    const nonPinnedIndex = index - (dbPosts.slice(0, index).filter((p) => p.is_pinned).length);
+    return (total - pinnedCount) - ((currentPage - 1) * limit) - nonPinnedIndex;
   };
 
   return (

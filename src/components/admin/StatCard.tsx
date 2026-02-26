@@ -26,13 +26,13 @@ function StatCardComponent({
   className,
 }: StatCardProps) {
   return (
-    <Card className={cn('bg-white border-neutral-200', className)}>
+    <Card className={cn('bg-card border-border', className)}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-neutral-500">{title}</p>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-neutral-900">{value}</p>
+              <p className="text-2xl font-bold text-foreground">{value}</p>
               {trend && (
                 <span
                   className={cn(
@@ -45,7 +45,7 @@ function StatCardComponent({
               )}
             </div>
             {description && (
-              <p className="text-xs text-neutral-400">{description}</p>
+              <p className="text-xs text-muted-foreground">{description}</p>
             )}
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gold-500/10">

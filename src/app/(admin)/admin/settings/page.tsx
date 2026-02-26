@@ -66,10 +66,10 @@ export default function SettingsAdminPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">사이트 설정</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <h1 className="text-2xl font-bold text-foreground">사이트 설정</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             웹사이트에 표시되는 오케스트라 정보를 관리합니다.
           </p>
         </div>
@@ -85,7 +85,7 @@ export default function SettingsAdminPage() {
 
       {/* Settings Tabs */}
       <Tabs defaultValue="basic">
-        <TabsList className="bg-white border border-neutral-200">
+        <TabsList className="bg-muted">
           <TabsTrigger
             value="basic"
             className="data-[state=active]:bg-gold-500 data-[state=active]:text-white"
@@ -111,7 +111,7 @@ export default function SettingsAdminPage() {
 
         {/* Basic Info Tab */}
         <TabsContent value="basic" className="mt-6 space-y-6">
-          <Card className="bg-white border-neutral-200">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg">오케스트라 기본 정보</CardTitle>
               <CardDescription>
@@ -119,14 +119,14 @@ export default function SettingsAdminPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="orchestraName">오케스트라명 (한글)</Label>
                   <Input
                     id="orchestraName"
                     value={settings.orchestraName}
                     onChange={(e) => handleChange('orchestraName', e.target.value)}
-                    className="bg-white"
+                    className=""
                   />
                 </div>
                 <div className="grid gap-2">
@@ -135,18 +135,18 @@ export default function SettingsAdminPage() {
                     id="orchestraNameEn"
                     value={settings.orchestraNameEn}
                     onChange={(e) => handleChange('orchestraNameEn', e.target.value)}
-                    className="bg-white"
+                    className=""
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="foundedYear">창단 연도</Label>
                   <Input
                     id="foundedYear"
                     value={settings.foundedYear}
                     onChange={(e) => handleChange('foundedYear', e.target.value)}
-                    className="bg-white"
+                    className=""
                   />
                 </div>
                 <div className="grid gap-2">
@@ -155,14 +155,14 @@ export default function SettingsAdminPage() {
                     id="slogan"
                     value={settings.slogan}
                     onChange={(e) => handleChange('slogan', e.target.value)}
-                    className="bg-white"
+                    className=""
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-neutral-200">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg">인사말</CardTitle>
               <CardDescription>
@@ -174,12 +174,12 @@ export default function SettingsAdminPage() {
                 value={settings.introduction}
                 onChange={(e) => handleChange('introduction', e.target.value)}
                 rows={8}
-                className="bg-white"
+                className=""
               />
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-neutral-200">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg">연혁</CardTitle>
               <CardDescription>
@@ -199,7 +199,7 @@ export default function SettingsAdminPage() {
 
         {/* Contact Tab */}
         <TabsContent value="contact" className="mt-6 space-y-6">
-          <Card className="bg-white border-neutral-200">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-gold-500" />
@@ -216,7 +216,7 @@ export default function SettingsAdminPage() {
                   id="address"
                   value={settings.address}
                   onChange={(e) => handleChange('address', e.target.value)}
-                  className="bg-white"
+                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -225,7 +225,7 @@ export default function SettingsAdminPage() {
                   id="addressDetail"
                   value={settings.addressDetail}
                   onChange={(e) => handleChange('addressDetail', e.target.value)}
-                  className="bg-white"
+                  className=""
                 />
               </div>
               <Separator />
@@ -235,7 +235,7 @@ export default function SettingsAdminPage() {
                   id="rehearsalLocation"
                   value={settings.rehearsalLocation}
                   onChange={(e) => handleChange('rehearsalLocation', e.target.value)}
-                  className="bg-white"
+                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -244,13 +244,13 @@ export default function SettingsAdminPage() {
                   id="rehearsalTime"
                   value={settings.rehearsalTime}
                   onChange={(e) => handleChange('rehearsalTime', e.target.value)}
-                  className="bg-white"
+                  className=""
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-neutral-200">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Phone className="h-5 w-5 text-gold-500" />
@@ -261,14 +261,14 @@ export default function SettingsAdminPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="phone">전화번호</Label>
                   <Input
                     id="phone"
                     value={settings.phone}
                     onChange={(e) => handleChange('phone', e.target.value)}
-                    className="bg-white"
+                    className=""
                   />
                 </div>
                 <div className="grid gap-2">
@@ -277,7 +277,7 @@ export default function SettingsAdminPage() {
                     id="fax"
                     value={settings.fax}
                     onChange={(e) => handleChange('fax', e.target.value)}
-                    className="bg-white"
+                    className=""
                   />
                 </div>
               </div>
@@ -288,7 +288,7 @@ export default function SettingsAdminPage() {
                   type="email"
                   value={settings.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  className="bg-white"
+                  className=""
                 />
               </div>
             </CardContent>
@@ -297,7 +297,7 @@ export default function SettingsAdminPage() {
 
         {/* Social Media Tab */}
         <TabsContent value="social" className="mt-6">
-          <Card className="bg-white border-neutral-200">
+          <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg">소셜 미디어 링크</CardTitle>
               <CardDescription>
@@ -307,7 +307,7 @@ export default function SettingsAdminPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="website" className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-neutral-500" />
+                  <Globe className="h-4 w-4 text-muted-foreground" />
                   웹사이트
                 </Label>
                 <Input
@@ -315,7 +315,7 @@ export default function SettingsAdminPage() {
                   value={settings.website}
                   onChange={(e) => handleChange('website', e.target.value)}
                   placeholder="https://yesanwind.or.kr"
-                  className="bg-white"
+                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -328,7 +328,7 @@ export default function SettingsAdminPage() {
                   value={settings.facebook}
                   onChange={(e) => handleChange('facebook', e.target.value)}
                   placeholder="https://facebook.com/yesanwind"
-                  className="bg-white"
+                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -341,7 +341,7 @@ export default function SettingsAdminPage() {
                   value={settings.instagram}
                   onChange={(e) => handleChange('instagram', e.target.value)}
                   placeholder="https://instagram.com/yesanwind"
-                  className="bg-white"
+                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -354,7 +354,7 @@ export default function SettingsAdminPage() {
                   value={settings.youtube}
                   onChange={(e) => handleChange('youtube', e.target.value)}
                   placeholder="https://youtube.com/@yesanwind"
-                  className="bg-white"
+                  className=""
                 />
               </div>
             </CardContent>

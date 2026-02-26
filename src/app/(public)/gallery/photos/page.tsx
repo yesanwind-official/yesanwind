@@ -1,18 +1,15 @@
 import { Metadata } from 'next';
 import { Images } from 'lucide-react';
 import { PhotoAlbumCard } from '@/components/features/gallery';
-import { mockAlbums } from '@/data/gallery';
+import { getAllAlbums } from '@/lib/gallery';
 
 export const metadata: Metadata = {
   title: '사진 갤러리 | 예산윈드오케스트라',
   description: '예산윈드오케스트라의 공연, 연습, 행사 사진 앨범을 만나보세요.',
 };
 
-export default function PhotosPage() {
-  // 날짜순 정렬 (최신순)
-  const sortedAlbums = [...mockAlbums].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+export default async function PhotosPage() {
+  const sortedAlbums = await getAllAlbums();
 
   return (
     <div>

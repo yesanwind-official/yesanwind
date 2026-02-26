@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { ConcertCard } from '@/components/features/concerts';
-import { mockConcerts, getUpcomingConcerts } from '@/data/mock-concerts';
+import { getUpcomingConcerts, getCompletedConcerts } from '@/lib/concerts';
 
 export const metadata: Metadata = {
   title: '공연 안내',
@@ -8,14 +8,20 @@ export const metadata: Metadata = {
     '예산윈드오케스트라의 공연 일정을 확인하세요. 정기연주회, 기획공연, 특별공연 등 다양한 공연 정보를 제공합니다.',
 };
 
-export default function ConcertsPage() {
-  // 예정된 공연
-  const upcomingConcerts = getUpcomingConcerts();
+export default async function ConcertsPage() {
+  // Supabase에서 예정된 공연과 종료된 공연을 병렬 조회
+  const [upcomingConcerts, completedConcerts] = await Promise.all([
+    getUpcomingConcerts(),
+    getCompletedConcerts(),
+  ]);
 
-  // 가까운 공연 순으로 정렬
-  const sortedConcerts = upcomingConcerts.sort(
+  // 가까운 공연 순으로 정렬 (getUpcomingConcerts가 이미 date asc로 정렬하지만 안전장치)
+  const sortedConcerts = [...upcomingConcerts].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
+
+  // 최근 종료 공연 최대 4개
+  const recentCompleted = completedConcerts.slice(0, 4);
 
   return (
     <div>
@@ -47,7 +53,7 @@ export default function ConcertsPage() {
       </section>
 
       {/* 최근 공연 미리보기 */}
-      {mockConcerts.filter((c) => c.status === 'completed').length > 0 && (
+      {recentCompleted.length > 0 && (
         <section className="mt-16">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -65,13 +71,9 @@ export default function ConcertsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {mockConcerts
-              .filter((c) => c.status === 'completed')
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-              .slice(0, 4)
-              .map((concert) => (
-                <ConcertCard key={concert.id} concert={concert} />
-              ))}
+            {recentCompleted.map((concert) => (
+              <ConcertCard key={concert.id} concert={concert} />
+            ))}
           </div>
         </section>
       )}

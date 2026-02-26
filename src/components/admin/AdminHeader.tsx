@@ -2,8 +2,10 @@
 
 import { memo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Menu, Bell, User, LogOut, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getClient } from '@/lib/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,13 +20,17 @@ interface AdminHeaderProps {
 }
 
 function AdminHeaderComponent({ onMenuClick }: AdminHeaderProps) {
-  const handleLogout = () => {
-    console.log('Logout clicked');
-    // TODO: Implement logout with Supabase Auth
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = getClient();
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center border-b border-neutral-200 bg-white px-4 shadow-sm">
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center border-b border-border bg-card px-4 shadow-sm">
       {/* Mobile menu button */}
       <Button
         variant="ghost"
@@ -38,24 +44,24 @@ function AdminHeaderComponent({ onMenuClick }: AdminHeaderProps) {
 
       {/* Left side - Breadcrumb or title area */}
       <div className="flex flex-1 items-center">
-        <h1 className="text-lg font-semibold text-neutral-900">
+        <h1 className="text-sm sm:text-lg font-semibold text-foreground truncate">
           예산윈드오케스트라 관리자
         </h1>
       </div>
 
       {/* Right side - Actions */}
       <div className="flex items-center gap-2">
-        {/* View site link */}
-        <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
-          <Link href="/" target="_blank" className="gap-2 text-neutral-600 hover:text-neutral-900">
-            <Home className="h-4 w-4" />
-            <span>사이트 보기</span>
+        {/* View site link - mobile only (desktop has it in sidebar) */}
+        <Button variant="ghost" size="icon" asChild className="md:hidden">
+          <Link href="/" target="_blank">
+            <Home className="h-5 w-5 text-muted-foreground" />
+            <span className="sr-only">사이트 보기</span>
           </Link>
         </Button>
 
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5 text-neutral-600" />
+          <Bell className="h-5 w-5 text-muted-foreground" />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
           <span className="sr-only">알림</span>
         </Button>
@@ -80,7 +86,7 @@ function AdminHeaderComponent({ onMenuClick }: AdminHeaderProps) {
               </Avatar>
               <div className="flex flex-col">
                 <span className="text-sm font-medium">관리자</span>
-                <span className="text-xs text-neutral-500">admin@yesanwind.or.kr</span>
+                <span className="text-xs text-muted-foreground">admin@yesanwind.or.kr</span>
               </div>
             </div>
             <DropdownMenuSeparator />

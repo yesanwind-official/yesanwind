@@ -21,6 +21,11 @@ export interface Column<T> {
   className?: string;
 }
 
+export interface SortOption {
+  key: string;
+  label: string;
+}
+
 interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
@@ -29,6 +34,8 @@ interface DataTableProps<T> {
   pageSize?: number;
   onRowClick?: (item: T) => void;
   className?: string;
+  renderMobileCard?: (item: T) => React.ReactNode;
+  mobileSortOptions?: SortOption[];
 }
 
 function DataTableComponent<T extends { id: string | number }>({
@@ -39,6 +46,8 @@ function DataTableComponent<T extends { id: string | number }>({
   pageSize = 10,
   onRowClick,
   className,
+  renderMobileCard,
+  mobileSortOptions,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -109,8 +118,8 @@ function DataTableComponent<T extends { id: string | number }>({
     <div className={cn('space-y-4', className)}>
       {/* Search */}
       {searchKey && (
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={searchPlaceholder}
             value={search}
@@ -118,29 +127,32 @@ function DataTableComponent<T extends { id: string | number }>({
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            className="pl-9 bg-white border-neutral-200"
+            className="pl-9"
           />
         </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+      {/* Desktop Table */}
+      <div className={cn(
+        'overflow-hidden rounded-lg border border-border bg-card',
+        renderMobileCard && 'hidden md:block'
+      )}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-neutral-200 bg-neutral-50">
+              <tr className="border-b border-border bg-muted">
                 {columns.map((column) => (
                   <th
                     key={column.key}
                     className={cn(
-                      'px-4 py-3 text-left text-sm font-medium text-neutral-600',
+                      'px-4 py-3 text-left text-sm font-medium text-muted-foreground',
                       column.className
                     )}
                   >
                     {column.sortable ? (
                       <button
                         onClick={() => handleSort(column.key)}
-                        className="inline-flex items-center gap-1 hover:text-neutral-900"
+                        className="inline-flex items-center gap-1 hover:text-foreground"
                       >
                         {column.header}
                         <ArrowUpDown className="h-3.5 w-3.5" />
@@ -152,12 +164,12 @@ function DataTableComponent<T extends { id: string | number }>({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200">
+            <tbody className="divide-y divide-border">
               {paginatedData.length === 0 ? (
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="px-4 py-8 text-center text-sm text-neutral-500"
+                    className="px-4 py-8 text-center text-sm text-muted-foreground"
                   >
                     데이터가 없습니다.
                   </td>
@@ -168,7 +180,7 @@ function DataTableComponent<T extends { id: string | number }>({
                     key={item.id}
                     onClick={() => onRowClick?.(item)}
                     className={cn(
-                      'transition-colors hover:bg-neutral-50',
+                      'transition-colors hover:bg-muted/50',
                       onRowClick && 'cursor-pointer'
                     )}
                   >
@@ -176,7 +188,7 @@ function DataTableComponent<T extends { id: string | number }>({
                       <td
                         key={column.key}
                         className={cn(
-                          'px-4 py-3 text-sm text-neutral-900',
+                          'px-4 py-3 text-sm text-foreground',
                           column.className
                         )}
                       >
@@ -193,10 +205,42 @@ function DataTableComponent<T extends { id: string | number }>({
         </div>
       </div>
 
+      {/* Mobile Card List */}
+      {renderMobileCard && (
+        <div className="md:hidden space-y-3">
+          {mobileSortOptions && mobileSortOptions.length > 0 && (
+            <select
+              onChange={(e) => {
+                const val = e.target.value;
+                if (!val) {
+                  setSortConfig(null);
+                } else {
+                  setSortConfig({ key: val, direction: 'asc' });
+                }
+              }}
+              value={sortConfig?.key ?? ''}
+              className="w-full h-9 rounded-md border border-border bg-card px-3 text-sm text-foreground"
+            >
+              <option value="">정렬</option>
+              {mobileSortOptions.map((opt) => (
+                <option key={opt.key} value={opt.key}>{opt.label}</option>
+              ))}
+            </select>
+          )}
+          {paginatedData.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">데이터가 없습니다.</p>
+          ) : (
+            paginatedData.map((item) => (
+              <div key={item.id}>{renderMobileCard(item)}</div>
+            ))
+          )}
+        </div>
+      )}
+
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-neutral-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-sm text-muted-foreground">
             총 {sortedData.length}개 중 {(currentPage - 1) * pageSize + 1}-
             {Math.min(currentPage * pageSize, sortedData.length)}개 표시
           </p>
@@ -206,7 +250,7 @@ function DataTableComponent<T extends { id: string | number }>({
               size="icon-sm"
               onClick={() => handlePageChange(1)}
               disabled={currentPage === 1}
-              className="bg-white"
+              className=""
             >
               <ChevronsLeft className="h-4 w-4" />
             </Button>
@@ -215,11 +259,11 @@ function DataTableComponent<T extends { id: string | number }>({
               size="icon-sm"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="bg-white"
+              className=""
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="px-3 text-sm text-neutral-600">
+            <span className="px-3 text-sm text-muted-foreground">
               {currentPage} / {totalPages}
             </span>
             <Button
@@ -227,7 +271,7 @@ function DataTableComponent<T extends { id: string | number }>({
               size="icon-sm"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="bg-white"
+              className=""
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -236,7 +280,7 @@ function DataTableComponent<T extends { id: string | number }>({
               size="icon-sm"
               onClick={() => handlePageChange(totalPages)}
               disabled={currentPage === totalPages}
-              className="bg-white"
+              className=""
             >
               <ChevronsRight className="h-4 w-4" />
             </Button>

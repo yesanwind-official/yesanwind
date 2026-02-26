@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getPostById, getAdjacentPosts } from '@/data/posts';
+import { getPostById, getAdjacentPosts, incrementViewCount } from '@/lib/posts';
+import { toUIPostWithAttachments, toUIAdjacentPost } from '@/lib/post-helpers';
 import { PostDetail } from '@/components/features/board';
 
 interface PostDetailPageProps {
@@ -12,7 +13,7 @@ interface PostDetailPageProps {
 
 export async function generateMetadata({ params }: PostDetailPageProps): Promise<Metadata> {
   const { id } = await params;
-  const post = getPostById(id);
+  const post = await getPostById(id);
 
   if (!post) {
     return {
@@ -29,18 +30,24 @@ export async function generateMetadata({ params }: PostDetailPageProps): Promise
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   const { category, id } = await params;
 
-  // 유효한 카테고리인지 확인
-  if (category !== 'notice' && category !== 'press') {
+  if (category !== 'notice') {
     notFound();
   }
 
-  const post = getPostById(id);
+  const post = await getPostById(id);
 
   if (!post || post.category !== category) {
     notFound();
   }
 
-  const { prev, next } = getAdjacentPosts(id, category);
+  // 조회수 증가 (비동기, 에러 무시)
+  await incrementViewCount(id);
 
-  return <PostDetail post={post} prevPost={prev} nextPost={next} />;
+  const { prev, next } = await getAdjacentPosts(id, category);
+
+  const uiPost = toUIPostWithAttachments(post);
+  const uiPrev = toUIAdjacentPost(prev);
+  const uiNext = toUIAdjacentPost(next);
+
+  return <PostDetail post={uiPost} prevPost={uiPrev} nextPost={uiNext} />;
 }

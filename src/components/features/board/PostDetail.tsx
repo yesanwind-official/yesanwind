@@ -12,7 +12,6 @@ import {
   ChevronDown,
   Download,
   FileText,
-  ExternalLink,
 } from 'lucide-react';
 import type { Post } from '@/data/posts';
 
@@ -53,7 +52,7 @@ function PostDetailComponent({ post, prevPost, nextPost, className }: PostDetail
         {/* 카테고리 배지 */}
         <div className="mb-4">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gold-500/10 text-gold-500">
-            {post.category === 'notice' ? '공지사항' : '언론보도'}
+            공지사항
           </span>
         </div>
 
@@ -76,28 +75,11 @@ function PostDetailComponent({ post, prevPost, nextPost, className }: PostDetail
             <Eye className="w-4 h-4" />
             조회 {post.views.toLocaleString()}
           </span>
-          {post.source && (
-            <span className="flex items-center gap-1.5">
-              <ExternalLink className="w-4 h-4" />
-              {post.source}
-            </span>
-          )}
         </div>
       </header>
 
       {/* 게시글 본문 */}
       <div className="mb-8">
-        {/* 썸네일 이미지 (언론보도) */}
-        {post.thumbnail && (
-          <div className="mb-6 rounded-lg overflow-hidden">
-            <img
-              src={post.thumbnail}
-              alt=""
-              className="w-full max-h-96 object-cover"
-            />
-          </div>
-        )}
-
         {/* HTML 본문 */}
         <div
           className="prose prose-invert prose-gold max-w-none"
@@ -106,24 +88,6 @@ function PostDetailComponent({ post, prevPost, nextPost, className }: PostDetail
             lineHeight: '1.8',
           }}
         />
-
-        {/* 원문 링크 (언론보도) */}
-        {post.sourceUrl && (
-          <div className="mt-8 p-4 bg-dark-800 rounded-lg border border-dark-700">
-            <a
-              href={post.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between group"
-            >
-              <span className="text-dark-300">원문 보기</span>
-              <span className="flex items-center gap-2 text-gold-500 group-hover:text-gold-400 transition-colors">
-                {post.source}에서 확인하기
-                <ExternalLink className="w-4 h-4" />
-              </span>
-            </a>
-          </div>
-        )}
       </div>
 
       {/* 첨부파일 */}

@@ -110,8 +110,8 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900">대시보드</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="text-2xl font-bold text-foreground">대시보드</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           예산윈드오케스트라 관리 현황을 한눈에 확인하세요.
         </p>
       </div>
@@ -131,9 +131,9 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <Card className="bg-white border-neutral-200">
+      <Card className="bg-card border-border">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-neutral-900">
+          <CardTitle className="text-lg font-semibold text-foreground">
             빠른 작업
           </CardTitle>
         </CardHeader>
@@ -145,19 +145,19 @@ export default function AdminDashboardPage() {
                 공연 추가
               </Link>
             </Button>
-            <Button asChild variant="outline" className="bg-white">
+            <Button asChild variant="outline">
               <Link href="/admin/posts">
                 <FileText className="mr-2 h-4 w-4" />
                 공지사항 작성
               </Link>
             </Button>
-            <Button asChild variant="outline" className="bg-white">
+            <Button asChild variant="outline">
               <Link href="/admin/gallery">
                 <Image className="mr-2 h-4 w-4" />
                 갤러리 추가
               </Link>
             </Button>
-            <Button asChild variant="outline" className="bg-white">
+            <Button asChild variant="outline">
               <Link href="/admin/members">
                 <Users className="mr-2 h-4 w-4" />
                 단원 관리
@@ -170,9 +170,9 @@ export default function AdminDashboardPage() {
       {/* Two Column Layout */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Activities */}
-        <Card className="bg-white border-neutral-200">
+        <Card className="bg-card border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold text-neutral-900">
+            <CardTitle className="text-lg font-semibold text-foreground">
               최근 활동
             </CardTitle>
           </CardHeader>
@@ -183,16 +183,16 @@ export default function AdminDashboardPage() {
                 return (
                   <div
                     key={activity.id}
-                    className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-neutral-50"
+                    className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
                   >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-500/10">
                       <Icon className="h-4 w-4 text-gold-600" />
                     </div>
                     <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium text-neutral-900">
+                      <p className="text-sm font-medium text-foreground">
                         {activity.title}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-neutral-500">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{activity.user}</span>
                         <span>-</span>
                         <span>{activity.date}</span>
@@ -206,9 +206,9 @@ export default function AdminDashboardPage() {
         </Card>
 
         {/* Upcoming Concerts */}
-        <Card className="bg-white border-neutral-200">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-lg font-semibold text-neutral-900">
+            <CardTitle className="text-lg font-semibold text-foreground">
               예정된 공연
             </CardTitle>
             <Button asChild variant="ghost" size="sm">
@@ -220,15 +220,15 @@ export default function AdminDashboardPage() {
               {upcomingConcerts.map((concert) => (
                 <div
                   key={concert.id}
-                  className="flex items-center justify-between rounded-lg border border-neutral-200 p-3 transition-colors hover:bg-neutral-50"
+                  className="flex items-center justify-between rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-500/10">
                       <Calendar className="h-5 w-5 text-gold-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-neutral-900">{concert.title}</p>
-                      <p className="text-sm text-neutral-500">{concert.date}</p>
+                      <p className="font-medium text-foreground">{concert.title}</p>
+                      <p className="text-sm text-muted-foreground">{concert.date}</p>
                     </div>
                   </div>
                   <Badge variant="secondary" className="bg-green-100 text-green-700">
@@ -242,26 +242,26 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Site Stats */}
-      <Card className="bg-white border-neutral-200">
+      <Card className="bg-card border-border">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-neutral-900">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <Eye className="h-5 w-5" />
             사이트 통계
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg bg-neutral-50 p-4 text-center">
-              <p className="text-2xl font-bold text-neutral-900">1,250</p>
-              <p className="text-sm text-neutral-500">이번 달 방문자</p>
+            <div className="rounded-lg bg-muted p-4 text-center">
+              <p className="text-2xl font-bold text-foreground">1,250</p>
+              <p className="text-sm text-muted-foreground">이번 달 방문자</p>
             </div>
-            <div className="rounded-lg bg-neutral-50 p-4 text-center">
-              <p className="text-2xl font-bold text-neutral-900">3,456</p>
-              <p className="text-sm text-neutral-500">이번 달 페이지뷰</p>
+            <div className="rounded-lg bg-muted p-4 text-center">
+              <p className="text-2xl font-bold text-foreground">3,456</p>
+              <p className="text-sm text-muted-foreground">이번 달 페이지뷰</p>
             </div>
-            <div className="rounded-lg bg-neutral-50 p-4 text-center">
-              <p className="text-2xl font-bold text-neutral-900">2분 30초</p>
-              <p className="text-sm text-neutral-500">평균 체류시간</p>
+            <div className="rounded-lg bg-muted p-4 text-center">
+              <p className="text-2xl font-bold text-foreground">2분 30초</p>
+              <p className="text-sm text-muted-foreground">평균 체류시간</p>
             </div>
           </div>
         </CardContent>

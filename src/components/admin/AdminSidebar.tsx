@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -12,6 +13,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -49,24 +51,36 @@ function AdminSidebarComponent({ isCollapsed, onToggle }: AdminSidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1a1a1a] text-white transition-all duration-300',
+        'fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar text-sidebar-foreground transition-all duration-300',
         isCollapsed ? 'w-16' : 'w-64'
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b border-neutral-800 px-4">
+      <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
         {!isCollapsed && (
           <Link href="/admin" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold-500">
-              <Music className="h-4 w-4 text-[#1a1a1a]" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white p-1">
+              <NextImage
+                src="/images/logo.png"
+                alt="예산윈드오케스트라"
+                width={40}
+                height={40}
+                className="w-full h-full object-contain"
+              />
             </div>
-            <span className="font-semibold text-white">관리자</span>
+            <span className="font-semibold text-sidebar-foreground">관리자</span>
           </Link>
         )}
         {isCollapsed && (
-          <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-gold-500">
-            <Music className="h-4 w-4 text-[#1a1a1a]" />
-          </div>
+          <Link href="/admin" className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1">
+            <NextImage
+              src="/images/logo.png"
+              alt="예산윈드오케스트라"
+              width={40}
+              height={40}
+              className="w-full h-full object-contain"
+            />
+          </Link>
         )}
       </div>
 
@@ -84,7 +98,7 @@ function AdminSidebarComponent({ isCollapsed, onToggle }: AdminSidebarProps) {
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 active
                   ? 'bg-gold-500/10 text-gold-500'
-                  : 'text-neutral-400 hover:bg-neutral-800 hover:text-white light:hover:text-dark-100',
+                  : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground',
                 isCollapsed && 'justify-center px-2'
               )}
               title={isCollapsed ? item.name : undefined}
@@ -96,14 +110,26 @@ function AdminSidebarComponent({ isCollapsed, onToggle }: AdminSidebarProps) {
         })}
       </nav>
 
-      {/* Collapse Toggle */}
-      <div className="border-t border-neutral-800 p-2">
+      {/* Site Link + Collapse Toggle */}
+      <div className="border-t border-sidebar-border p-2 space-y-1">
+        <Link
+          href="/"
+          target="_blank"
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors',
+            isCollapsed && 'justify-center px-2'
+          )}
+          title={isCollapsed ? '사이트 보기' : undefined}
+        >
+          <ExternalLink className="h-5 w-5 shrink-0" />
+          {!isCollapsed && <span>사이트 보기</span>}
+        </Link>
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggle}
           className={cn(
-            'w-full justify-center text-neutral-400 hover:bg-neutral-800 hover:text-white light:hover:text-dark-100',
+            'w-full justify-center text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground',
             !isCollapsed && 'justify-start'
           )}
         >

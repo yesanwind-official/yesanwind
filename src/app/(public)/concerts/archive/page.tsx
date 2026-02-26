@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { ArchiveFilter } from '@/components/features/concerts/ArchiveFilter';
-import { getCompletedConcerts, getAvailableYears } from '@/data/mock-concerts';
+import { getCompletedConcerts, getAvailableYears } from '@/lib/concerts';
 
 export const metadata: Metadata = {
   title: '지난 공연',
@@ -8,9 +8,11 @@ export const metadata: Metadata = {
     '예산윈드오케스트라의 지난 공연 아카이브입니다. 연도별로 지난 공연 기록을 확인하세요.',
 };
 
-export default function ConcertArchivePage() {
-  const completedConcerts = getCompletedConcerts();
-  const availableYears = getAvailableYears();
+export default async function ConcertArchivePage() {
+  const [completedConcerts, availableYears] = await Promise.all([
+    getCompletedConcerts(),
+    getAvailableYears(),
+  ]);
 
   return (
     <div>

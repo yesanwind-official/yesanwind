@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Pin, PinOff } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Pin, PinOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DataTable, Column } from '@/components/admin';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DataTable, Column, SortOption } from '@/components/admin';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,66 +22,219 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { notices, pressReleases, type Post } from '@/data/posts';
+import { useSupabase } from '@/hooks/use-supabase';
 
 interface PostRow {
   id: string;
   category: string;
   title: string;
+  content: string;
   author: string;
   createdAt: string;
   views: number;
-  isPinned?: boolean;
-  source?: string;
+  isPinned: boolean;
 }
 
-const noticeData: PostRow[] = notices.map((post) => ({
-  id: post.id,
-  category: post.category,
-  title: post.title,
-  author: post.author,
-  createdAt: post.createdAt,
-  views: post.views,
-  isPinned: post.isPinned,
-}));
-
-const pressData: PostRow[] = pressReleases.map((post) => ({
-  id: post.id,
-  category: post.category,
-  title: post.title,
-  author: post.author,
-  createdAt: post.createdAt,
-  views: post.views,
-  source: post.source,
-}));
-
 export default function PostsAdminPage() {
-  const [activeTab, setActiveTab] = useState('notice');
+  const supabase = useSupabase();
+  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<PostRow | null>(null);
 
-  const currentData = activeTab === 'notice' ? noticeData : pressData;
+  // Form state
+  const [formTitle, setFormTitle] = useState('');
+  const [formContent, setFormContent] = useState('');
+  const [formIsPinned, setFormIsPinned] = useState(false);
 
-  const handleCreate = () => {
-    console.log('Create post:', activeTab);
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('category', 'notice')
+      .order('is_pinned', { ascending: false })
+      .order('published_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching posts:', error);
+      setLoading(false);
+      return;
+    }
+
+    setPosts(
+      (data || []).map((post) => ({
+        id: post.id,
+        category: post.category,
+        title: post.title,
+        content: post.content,
+        author: '관리자',
+        createdAt: post.published_at.split('T')[0],
+        views: post.view_count,
+        isPinned: post.is_pinned,
+      }))
+    );
+    setLoading(false);
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  const resetForm = () => {
+    setFormTitle('');
+    setFormContent('');
+    setFormIsPinned(false);
+  };
+
+  const handleCreate = async () => {
+    if (!formTitle.trim() || !formContent.trim()) return;
+    setSaving(true);
+
+    const { error } = await supabase.from('posts').insert({
+      title: formTitle.trim(),
+      content: formContent.trim(),
+      category: 'notice' as const,
+      is_pinned: formIsPinned,
+    });
+
+    setSaving(false);
+    if (error) {
+      console.error('Error creating post:', error);
+      alert('게시글 등록에 실패했습니다.');
+      return;
+    }
+
     setIsCreateOpen(false);
+    resetForm();
+    fetchPosts();
   };
 
-  const handleEdit = () => {
-    console.log('Edit post:', selectedPost?.id);
+  const handleEdit = async () => {
+    if (!selectedPost || !formTitle.trim() || !formContent.trim()) return;
+    setSaving(true);
+
+    const { error } = await supabase
+      .from('posts')
+      .update({
+        title: formTitle.trim(),
+        content: formContent.trim(),
+        is_pinned: formIsPinned,
+      })
+      .eq('id', selectedPost.id);
+
+    setSaving(false);
+    if (error) {
+      console.error('Error updating post:', error);
+      alert('게시글 수정에 실패했습니다.');
+      return;
+    }
+
     setIsEditOpen(false);
+    resetForm();
+    fetchPosts();
   };
 
-  const handleDelete = () => {
-    console.log('Delete post:', selectedPost?.id);
+  const handleDelete = async () => {
+    if (!selectedPost) return;
+    setSaving(true);
+
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', selectedPost.id);
+
+    setSaving(false);
+    if (error) {
+      console.error('Error deleting post:', error);
+      alert('게시글 삭제에 실패했습니다.');
+      return;
+    }
+
     setIsDeleteOpen(false);
+    setSelectedPost(null);
+    fetchPosts();
   };
 
-  const handleTogglePin = (id: string, isPinned: boolean) => {
-    console.log('Toggle pin:', id, !isPinned);
+  const handleTogglePin = async (id: string, currentIsPinned: boolean) => {
+    const { error } = await supabase
+      .from('posts')
+      .update({ is_pinned: !currentIsPinned })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error toggling pin:', error);
+      return;
+    }
+
+    fetchPosts();
   };
+
+  const openEditDialog = (row: PostRow) => {
+    setSelectedPost(row);
+    setFormTitle(row.title);
+    setFormContent(row.content);
+    setFormIsPinned(row.isPinned);
+    setIsEditOpen(true);
+  };
+
+  const postSortOptions: SortOption[] = [
+    { key: 'title', label: '제목' },
+    { key: 'createdAt', label: '작성일' },
+    { key: 'views', label: '조회수' },
+  ];
+
+  const renderPostCard = (row: PostRow) => (
+    <div className="rounded-lg border border-border bg-card p-4 space-y-2">
+      <div className="flex items-center gap-2">
+        {row.isPinned && <Pin className="h-4 w-4 shrink-0 text-gold-500" />}
+        <p className="font-medium text-foreground truncate">{row.title}</p>
+      </div>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {row.createdAt} · 조회 {row.views.toLocaleString()}
+        </p>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-sm">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <a href={`/board/notice/${row.id}`} target="_blank" rel="noopener noreferrer">
+                <Eye className="mr-2 h-4 w-4" />
+                보기
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleTogglePin(row.id, row.isPinned)}>
+              {row.isPinned ? (
+                <><PinOff className="mr-2 h-4 w-4" />고정 해제</>
+              ) : (
+                <><Pin className="mr-2 h-4 w-4" />상단 고정</>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openEditDialog(row)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              수정
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => { setSelectedPost(row); setIsDeleteOpen(true); }}
+              className="text-red-600 focus:bg-red-50 focus:text-red-600"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              삭제
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
 
   const noticeColumns: Column<PostRow>[] = [
     {
@@ -95,26 +246,26 @@ export default function PostsAdminPage() {
           {row.isPinned && (
             <Pin className="h-4 w-4 shrink-0 text-gold-500" />
           )}
-          <span className="font-medium text-neutral-900 truncate">{row.title}</span>
+          <span className="font-medium text-foreground truncate">{row.title}</span>
         </div>
       ),
     },
     {
       key: 'author',
       header: '작성자',
-      cell: (row) => <span className="text-neutral-700">{row.author}</span>,
+      cell: (row) => <span className="text-foreground">{row.author}</span>,
     },
     {
       key: 'createdAt',
       header: '작성일',
       sortable: true,
-      cell: (row) => <span className="text-neutral-700">{row.createdAt}</span>,
+      cell: (row) => <span className="text-foreground">{row.createdAt}</span>,
     },
     {
       key: 'views',
       header: '조회수',
       sortable: true,
-      cell: (row) => <span className="text-neutral-700">{row.views.toLocaleString()}</span>,
+      cell: (row) => <span className="text-foreground">{row.views.toLocaleString()}</span>,
     },
     {
       key: 'actions',
@@ -134,7 +285,7 @@ export default function PostsAdminPage() {
                 보기
               </a>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleTogglePin(row.id, row.isPinned || false)}>
+            <DropdownMenuItem onClick={() => handleTogglePin(row.id, row.isPinned)}>
               {row.isPinned ? (
                 <>
                   <PinOff className="mr-2 h-4 w-4" />
@@ -147,12 +298,7 @@ export default function PostsAdminPage() {
                 </>
               )}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                setSelectedPost(row);
-                setIsEditOpen(true);
-              }}
-            >
+            <DropdownMenuItem onClick={() => openEditDialog(row)}>
               <Pencil className="mr-2 h-4 w-4" />
               수정
             </DropdownMenuItem>
@@ -173,190 +319,101 @@ export default function PostsAdminPage() {
     },
   ];
 
-  const pressColumns: Column<PostRow>[] = [
-    {
-      key: 'title',
-      header: '제목',
-      sortable: true,
-      cell: (row) => (
-        <span className="font-medium text-neutral-900 truncate max-w-md block">{row.title}</span>
-      ),
-    },
-    {
-      key: 'source',
-      header: '출처',
-      cell: (row) => (
-        <Badge variant="outline" className="bg-white">
-          {row.source || row.author}
-        </Badge>
-      ),
-    },
-    {
-      key: 'createdAt',
-      header: '작성일',
-      sortable: true,
-      cell: (row) => <span className="text-neutral-700">{row.createdAt}</span>,
-    },
-    {
-      key: 'views',
-      header: '조회수',
-      sortable: true,
-      cell: (row) => <span className="text-neutral-700">{row.views.toLocaleString()}</span>,
-    },
-    {
-      key: 'actions',
-      header: '',
-      className: 'w-[50px]',
-      cell: (row) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <a href={`/board/press/${row.id}`} target="_blank" rel="noopener noreferrer">
-                <Eye className="mr-2 h-4 w-4" />
-                보기
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                setSelectedPost(row);
-                setIsEditOpen(true);
-              }}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              수정
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                setSelectedPost(row);
-                setIsDeleteOpen(true);
-              }}
-              className="text-red-600 focus:bg-red-50 focus:text-red-600"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              삭제
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-gold-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">게시판 관리</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            공지사항과 언론보도를 관리합니다.
+          <h1 className="text-2xl font-bold text-foreground">게시판 관리</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            공지사항을 관리합니다.
           </p>
         </div>
         <Button
-          onClick={() => setIsCreateOpen(true)}
+          onClick={() => {
+            resetForm();
+            setIsCreateOpen(true);
+          }}
           className="bg-gold-500 hover:bg-gold-600 text-white"
         >
           <Plus className="mr-2 h-4 w-4" />
-          {activeTab === 'notice' ? '공지사항 작성' : '언론보도 등록'}
+          공지사항 작성
         </Button>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-white border border-neutral-200">
-          <TabsTrigger
-            value="notice"
-            className="data-[state=active]:bg-gold-500 data-[state=active]:text-white"
-          >
-            공지사항 ({noticeData.length})
-          </TabsTrigger>
-          <TabsTrigger
-            value="press"
-            className="data-[state=active]:bg-gold-500 data-[state=active]:text-white"
-          >
-            언론보도 ({pressData.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="notice" className="mt-6">
-          <DataTable
-            data={noticeData}
-            columns={noticeColumns}
-            searchKey="title"
-            searchPlaceholder="제목으로 검색..."
-            pageSize={10}
-          />
-        </TabsContent>
-
-        <TabsContent value="press" className="mt-6">
-          <DataTable
-            data={pressData}
-            columns={pressColumns}
-            searchKey="title"
-            searchPlaceholder="제목으로 검색..."
-            pageSize={10}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Data Table */}
+      <DataTable
+        data={posts}
+        columns={noticeColumns}
+        searchKey="title"
+        searchPlaceholder="제목으로 검색..."
+        pageSize={10}
+        renderMobileCard={renderPostCard}
+        mobileSortOptions={postSortOptions}
+      />
 
       {/* Create Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-2xl bg-white">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>
-              {activeTab === 'notice' ? '공지사항 작성' : '언론보도 등록'}
-            </DialogTitle>
+            <DialogTitle>공지사항 작성</DialogTitle>
             <DialogDescription>
-              {activeTab === 'notice'
-                ? '새로운 공지사항을 작성하세요.'
-                : '언론보도 정보를 등록하세요.'}
+              새로운 공지사항을 작성하세요.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="title">제목</Label>
-              <Input id="title" placeholder="제목을 입력하세요" className="bg-white" />
+              <Input
+                id="title"
+                placeholder="제목을 입력하세요"
+                className=""
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+              />
             </div>
-            {activeTab === 'press' && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="source">출처</Label>
-                  <Input id="source" placeholder="충남일보" className="bg-white" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="sourceUrl">원문 링크</Label>
-                  <Input id="sourceUrl" placeholder="https://..." className="bg-white" />
-                </div>
-              </div>
-            )}
             <div className="grid gap-2">
               <Label htmlFor="content">내용</Label>
               <Textarea
                 id="content"
                 placeholder="내용을 입력하세요."
                 rows={10}
-                className="bg-white"
+                className=""
+                value={formContent}
+                onChange={(e) => setFormContent(e.target.value)}
               />
             </div>
-            {activeTab === 'notice' && (
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="isPinned" className="h-4 w-4" />
-                <Label htmlFor="isPinned" className="font-normal">
-                  상단에 고정
-                </Label>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="isPinned"
+                className="h-4 w-4"
+                checked={formIsPinned}
+                onChange={(e) => setFormIsPinned(e.target.checked)}
+              />
+              <Label htmlFor="isPinned" className="font-normal">
+                상단에 고정
+              </Label>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
               취소
             </Button>
-            <Button onClick={handleCreate} className="bg-gold-500 hover:bg-gold-600 text-white">
+            <Button
+              onClick={handleCreate}
+              disabled={saving || !formTitle.trim() || !formContent.trim()}
+              className="bg-gold-500 hover:bg-gold-600 text-white"
+            >
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               등록
             </Button>
           </DialogFooter>
@@ -365,7 +422,7 @@ export default function PostsAdminPage() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-2xl bg-white">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>게시글 수정</DialogTitle>
             <DialogDescription>
@@ -377,8 +434,9 @@ export default function PostsAdminPage() {
               <Label htmlFor="edit-title">제목</Label>
               <Input
                 id="edit-title"
-                defaultValue={selectedPost?.title}
-                className="bg-white"
+                className=""
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
@@ -387,15 +445,34 @@ export default function PostsAdminPage() {
                 id="edit-content"
                 placeholder="내용을 입력하세요."
                 rows={10}
-                className="bg-white"
+                className=""
+                value={formContent}
+                onChange={(e) => setFormContent(e.target.value)}
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="edit-isPinned"
+                className="h-4 w-4"
+                checked={formIsPinned}
+                onChange={(e) => setFormIsPinned(e.target.checked)}
+              />
+              <Label htmlFor="edit-isPinned" className="font-normal">
+                상단에 고정
+              </Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
               취소
             </Button>
-            <Button onClick={handleEdit} className="bg-gold-500 hover:bg-gold-600 text-white">
+            <Button
+              onClick={handleEdit}
+              disabled={saving || !formTitle.trim() || !formContent.trim()}
+              className="bg-gold-500 hover:bg-gold-600 text-white"
+            >
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               저장
             </Button>
           </DialogFooter>
@@ -404,13 +481,13 @@ export default function PostsAdminPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="bg-white">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>게시글 삭제</DialogTitle>
             <DialogDescription>
               정말로 이 게시글을 삭제하시겠습니까?
               <br />
-              <span className="font-medium text-neutral-900">&quot;{selectedPost?.title}&quot;</span>
+              <span className="font-medium text-foreground">&quot;{selectedPost?.title}&quot;</span>
               <br />
               이 작업은 되돌릴 수 없습니다.
             </DialogDescription>
@@ -419,7 +496,8 @@ export default function PostsAdminPage() {
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
               취소
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
+            <Button variant="destructive" onClick={handleDelete} disabled={saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               삭제
             </Button>
           </DialogFooter>

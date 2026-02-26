@@ -2,24 +2,21 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Images } from 'lucide-react';
-import { getAlbumById, mockAlbums, formatGalleryDate } from '@/data/gallery';
+import { getAlbumById } from '@/lib/gallery';
+import { formatGalleryDate } from '@/data/gallery';
 import { AlbumPhotoGallery } from './AlbumPhotoGallery';
+
+// 동적 렌더링 (Supabase에서 데이터 조회)
+export const dynamic = 'force-dynamic';
 
 interface AlbumPageProps {
   params: Promise<{ id: string }>;
 }
 
-// 정적 생성을 위한 파라미터
-export async function generateStaticParams() {
-  return mockAlbums.map((album) => ({
-    id: album.id,
-  }));
-}
-
 // 메타데이터 생성
 export async function generateMetadata({ params }: AlbumPageProps): Promise<Metadata> {
   const { id } = await params;
-  const album = getAlbumById(id);
+  const album = await getAlbumById(id);
 
   if (!album) {
     return {
@@ -35,7 +32,7 @@ export async function generateMetadata({ params }: AlbumPageProps): Promise<Meta
 
 export default async function AlbumPage({ params }: AlbumPageProps) {
   const { id } = await params;
-  const album = getAlbumById(id);
+  const album = await getAlbumById(id);
 
   if (!album) {
     notFound();

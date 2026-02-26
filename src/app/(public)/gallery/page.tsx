@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowRight, Images, Video } from 'lucide-react';
 import { PhotoAlbumCard } from '@/components/features/gallery';
 import { VideoCard } from '@/components/features/gallery';
-import { getRecentAlbums, getRecentVideos } from '@/data/gallery';
+import { getRecentAlbums, getRecentVideos } from '@/lib/gallery';
 import { GalleryVideoSection } from './GalleryVideoSection';
 
 export const metadata: Metadata = {
@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   description: '예산윈드오케스트라의 공연, 연습, 행사 사진과 영상 갤러리입니다.',
 };
 
-export default function GalleryPage() {
-  const recentAlbums = getRecentAlbums(4);
-  const recentVideos = getRecentVideos(4);
+export default async function GalleryPage() {
+  const recentAlbums = await getRecentAlbums(4);
+  const recentVideos = await getRecentVideos(4);
 
   return (
     <div className="space-y-16">

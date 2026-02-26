@@ -110,7 +110,7 @@ export interface ConcertProgram {
 }
 
 // 공지사항 카테고리
-export type NoticeCategory = 'notice' | 'news' | 'press' | 'recruitment';
+export type NoticeCategory = 'notice' | 'news' | 'recruitment';
 
 // 공지사항/뉴스
 export interface Notice extends BaseEntity {

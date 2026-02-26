@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Megaphone, Newspaper } from 'lucide-react';
+import { Megaphone } from 'lucide-react';
 
 // 서브 네비게이션 메뉴 아이템
 const subNavItems = [
@@ -11,11 +11,6 @@ const subNavItems = [
     name: '공지사항',
     href: '/board/notice',
     icon: Megaphone,
-  },
-  {
-    name: '언론보도',
-    href: '/board/press',
-    icon: Newspaper,
   },
 ];
 
@@ -27,12 +22,11 @@ export default function BoardLayout({
   const pathname = usePathname();
 
   // 게시글 상세 페이지인지 확인
-  const isDetailPage = /^\/board\/(notice|press)\/[^/]+$/.test(pathname);
+  const isDetailPage = /^\/board\/notice\/[^/]+$/.test(pathname);
 
   // 현재 활성화된 메뉴 확인
   const getActiveItem = () => {
     if (pathname.startsWith('/board/notice')) return '/board/notice';
-    if (pathname.startsWith('/board/press')) return '/board/press';
     return '';
   };
 
@@ -57,7 +51,7 @@ export default function BoardLayout({
               게시판
             </h1>
             <p className="text-dark-300 text-base md:text-lg max-w-2xl mx-auto">
-              예산윈드오케스트라의 공지사항과 언론보도를 확인하세요
+              예산윈드오케스트라의 공지사항을 확인하세요
             </p>
             <div className="w-16 h-0.5 bg-gold-500 mx-auto mt-6" />
           </div>

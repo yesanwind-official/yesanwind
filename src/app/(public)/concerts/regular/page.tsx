@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { ConcertCard } from '@/components/features/concerts';
-import { getConcertsByCategory } from '@/data/mock-concerts';
+import { getConcertsByCategory } from '@/lib/concerts';
 
 export const metadata: Metadata = {
   title: '정기연주회',
@@ -8,8 +8,8 @@ export const metadata: Metadata = {
     '예산윈드오케스트라의 정기연주회 일정입니다. 매년 봄, 가을에 열리는 정기연주회 정보를 확인하세요.',
 };
 
-export default function RegularConcertsPage() {
-  const regularConcerts = getConcertsByCategory('regular');
+export default async function RegularConcertsPage() {
+  const regularConcerts = await getConcertsByCategory('regular');
 
   // 날짜순 정렬 (예정된 공연이 먼저, 그 다음 지난 공연)
   const sortedConcerts = regularConcerts.sort((a, b) => {

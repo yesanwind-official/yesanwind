@@ -16,7 +16,7 @@ const organizationStructure = {
     },
     {
       position: '음악감독 겸 상임지휘자',
-      name: '김예산',
+      name: '김태혁',
       description: '음악적 방향 및 지휘',
     },
     {

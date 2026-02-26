@@ -10,10 +10,10 @@ export const metadata: Metadata = {
 // Mock Data
 const greetingData = {
   conductor: {
-    name: '김예산',
+    name: '김태혁',
     title: '음악감독 겸 상임지휘자',
     image: '/images/conductor.jpg',
-    greeting: `안녕하십니까, 예산윈드오케스트라 음악감독 겸 상임지휘자 김예산입니다.
+    greeting: `안녕하십니까, 예산윈드오케스트라 음악감독 겸 상임지휘자 김태혁입니다.
 
 예산윈드오케스트라 홈페이지를 방문해 주신 여러분께 진심으로 감사의 말씀을 드립니다.
 

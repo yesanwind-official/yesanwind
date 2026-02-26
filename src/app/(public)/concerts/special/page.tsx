@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { ConcertCard } from '@/components/features/concerts';
-import { mockConcerts } from '@/data/mock-concerts';
+import { getConcertsByCategory } from '@/lib/concerts';
 
 export const metadata: Metadata = {
   title: '기획공연',
@@ -8,18 +8,12 @@ export const metadata: Metadata = {
     '예산윈드오케스트라의 특별 기획공연입니다. 송년음악회, 신년음악회, 지역 협력 공연 등 다양한 기획 공연을 확인하세요.',
 };
 
-export default function SpecialConcertsPage() {
-  // special, festival, charity, collaboration 카테고리 포함
-  const specialConcerts = mockConcerts.filter(
-    (concert) =>
-      concert.category === 'special' ||
-      concert.category === 'festival' ||
-      concert.category === 'charity' ||
-      concert.category === 'collaboration'
-  );
+export default async function SpecialConcertsPage() {
+  // DB의 concert_type='special'에 해당하는 공연 조회
+  const specialConcerts = await getConcertsByCategory('special');
 
   // 날짜순 정렬 (예정된 공연이 먼저, 그 다음 지난 공연)
-  const sortedConcerts = specialConcerts.sort((a, b) => {
+  const sortedConcerts = [...specialConcerts].sort((a, b) => {
     const statusOrder = { upcoming: 0, ongoing: 1, completed: 2, cancelled: 3 };
     const statusDiff = statusOrder[a.status] - statusOrder[b.status];
     if (statusDiff !== 0) return statusDiff;

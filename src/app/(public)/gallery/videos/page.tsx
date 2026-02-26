@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { Video } from 'lucide-react';
-import { mockVideos } from '@/data/gallery';
+import { getAllVideos } from '@/lib/gallery';
 import { VideosPageContent } from './VideosPageContent';
 
 export const metadata: Metadata = {
@@ -8,11 +8,8 @@ export const metadata: Metadata = {
   description: '예산윈드오케스트라의 공연, 연습, 인터뷰 영상을 만나보세요.',
 };
 
-export default function VideosPage() {
-  // 날짜순 정렬 (최신순)
-  const sortedVideos = [...mockVideos].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+export default async function VideosPage() {
+  const sortedVideos = await getAllVideos();
 
   return (
     <div>
