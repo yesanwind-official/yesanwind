@@ -1,6 +1,3 @@
-# Large video files - served from Supabase Storage instead
-public/videos/
-
 # npm cache (accidentally created in project root on Windows)
 %LOCALAPPDATA%/
 
@@ -9,8 +6,8 @@ public/videos/
 .mcp.json
 .playwright-mcp/
 
-# Screenshots
-*.png
+# Playwright screenshots (not in public/)
+.playwright-mcp/**/*.png
 
 # Supabase temp
 supabase/.temp/
