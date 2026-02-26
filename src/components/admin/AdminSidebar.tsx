@@ -6,6 +6,7 @@ import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
+  Home,
   Music,
   Users,
   FileText,
@@ -27,6 +28,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: '대시보드', href: '/admin', icon: LayoutDashboard },
+  { name: '메인페이지', href: '/admin/landing', icon: Home },
   { name: '공연 관리', href: '/admin/concerts', icon: Music },
   { name: '단원 관리', href: '/admin/members', icon: Users },
   { name: '게시판 관리', href: '/admin/posts', icon: FileText },
@@ -67,6 +69,7 @@ function AdminSidebarComponent({ isCollapsed, onToggle }: AdminSidebarProps) {
                 alt="예산윈드오케스트라"
                 width={40}
                 height={40}
+                unoptimized
                 className="w-full h-full object-contain"
               />
             </div>
@@ -116,7 +119,6 @@ function AdminSidebarComponent({ isCollapsed, onToggle }: AdminSidebarProps) {
       <div className="border-t border-sidebar-border p-2 space-y-1">
         <Link
           href="/"
-          target="_blank"
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors',
             isCollapsed && 'justify-center px-2'

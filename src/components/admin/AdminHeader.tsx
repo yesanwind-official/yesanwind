@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Menu, Bell, User, LogOut, Home } from 'lucide-react';
+import { Menu, User, LogOut, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getClient } from '@/lib/supabase/client';
 import {
@@ -57,13 +57,6 @@ function AdminHeaderComponent({ onMenuClick }: AdminHeaderProps) {
             <Home className="h-5 w-5 text-muted-foreground" />
             <span className="sr-only">사이트 보기</span>
           </Link>
-        </Button>
-
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
-          <span className="sr-only">알림</span>
         </Button>
 
         {/* User menu */}

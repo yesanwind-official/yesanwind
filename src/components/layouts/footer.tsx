@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Phone, Mail } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
 const footerNavigation = {
   main: [
@@ -16,37 +17,79 @@ const footerNavigation = {
   ],
 };
 
-const socialLinks = [
-  {
-    name: 'Facebook',
-    href: '#',
-    icon: (props: React.SVGProps<SVGSVGElement>) => (
-      <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Instagram',
-    href: '#',
-    icon: (props: React.SVGProps<SVGSVGElement>) => (
-      <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'YouTube',
-    href: '#',
-    icon: (props: React.SVGProps<SVGSVGElement>) => (
-      <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-      </svg>
-    ),
-  },
-];
+// SVG 아이콘 컴포넌트
+function FacebookIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
 
-export function Footer() {
+function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+    </svg>
+  );
+}
+
+function YouTubeIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
+// 기본값 (DB 실패 시 폴백)
+const fallback = {
+  contact_address: '충청남도 예산군 예산읍',
+  contact_phone: '041-123-4567',
+  contact_email: 'info@yesanwind.or.kr',
+  sns_facebook: '',
+  sns_instagram: '',
+  sns_youtube: '',
+};
+
+async function getFooterSettings() {
+  try {
+    const supabase = await createClient();
+    if (!supabase) return fallback;
+
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('key, value');
+
+    if (error || !data) return fallback;
+
+    const map: Record<string, string> = {};
+    for (const row of data) {
+      map[row.key] = row.value || '';
+    }
+
+    return {
+      contact_address: map['contact_address'] || fallback.contact_address,
+      contact_phone: map['contact_phone'] || fallback.contact_phone,
+      contact_email: map['contact_email'] || fallback.contact_email,
+      sns_facebook: map['sns_facebook'] || '',
+      sns_instagram: map['sns_instagram'] || '',
+      sns_youtube: map['sns_youtube'] || '',
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+export async function Footer() {
+  const settings = await getFooterSettings();
+
+  const socialLinks = [
+    { name: 'Facebook', href: settings.sns_facebook, Icon: FacebookIcon },
+    { name: 'Instagram', href: settings.sns_instagram, Icon: InstagramIcon },
+    { name: 'YouTube', href: settings.sns_youtube, Icon: YouTubeIcon },
+  ].filter((item) => item.href);
+
   return (
     <footer className="bg-dark-950 border-t border-dark-700">
       {/* Main Footer Content */}
@@ -60,6 +103,7 @@ export function Footer() {
                 alt="예산윈드오케스트라"
                 width={40}
                 height={40}
+                unoptimized
                 className="w-10 h-10 object-contain"
               />
               <span className="font-serif text-xl font-bold tracking-wide text-white light:text-dark-100">
@@ -72,20 +116,22 @@ export function Footer() {
               예산윈드오케스트라가 함께합니다.
             </p>
             {/* Social Links */}
-            <div className="flex gap-3">
-              {socialLinks.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-dark-800 text-dark-300 hover:bg-gold-500 hover:text-dark-950 transition-all duration-300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={item.name}
-                >
-                  <item.icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="flex gap-3">
+                {socialLinks.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-dark-800 text-dark-300 hover:bg-gold-500 hover:text-dark-950 transition-all duration-300"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={item.name}
+                  >
+                    <item.Icon className="w-5 h-5" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Quick Links */}
@@ -109,27 +155,29 @@ export function Footer() {
           <div>
             <h3 className="text-white light:text-dark-100 font-semibold mb-4">연락처</h3>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3 text-dark-300 text-sm">
-                <MapPin className="w-4 h-4 mt-0.5 text-gold-500 flex-shrink-0" />
-                <span>
-                  충청남도 예산군 예산읍
-                  <br />
-                  예산로 123
-                </span>
-              </li>
-              <li className="flex items-center gap-3 text-dark-300 text-sm">
-                <Phone className="w-4 h-4 text-gold-500 flex-shrink-0" />
-                <span>041-123-4567</span>
-              </li>
-              <li className="flex items-center gap-3 text-dark-300 text-sm">
-                <Mail className="w-4 h-4 text-gold-500 flex-shrink-0" />
-                <a
-                  href="mailto:info@yesanwind.or.kr"
-                  className="hover:text-gold-500 transition-colors"
-                >
-                  info@yesanwind.or.kr
-                </a>
-              </li>
+              {settings.contact_address && (
+                <li className="flex items-start gap-3 text-dark-300 text-sm">
+                  <MapPin className="w-4 h-4 mt-0.5 text-gold-500 flex-shrink-0" />
+                  <span>{settings.contact_address}</span>
+                </li>
+              )}
+              {settings.contact_phone && (
+                <li className="flex items-center gap-3 text-dark-300 text-sm">
+                  <Phone className="w-4 h-4 text-gold-500 flex-shrink-0" />
+                  <span>{settings.contact_phone}</span>
+                </li>
+              )}
+              {settings.contact_email && (
+                <li className="flex items-center gap-3 text-dark-300 text-sm">
+                  <Mail className="w-4 h-4 text-gold-500 flex-shrink-0" />
+                  <a
+                    href={`mailto:${settings.contact_email}`}
+                    className="hover:text-gold-500 transition-colors"
+                  >
+                    {settings.contact_email}
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 

@@ -1,67 +1,134 @@
 'use client';
 
-import { useState } from 'react';
-import { Save, Info, MapPin, Phone, Globe, Facebook, Instagram, Youtube } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Save, Info, MapPin, Phone, Globe, Facebook, Instagram, Youtube, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { useSupabase } from '@/hooks/use-supabase';
 
-// Mock site settings
-const initialSettings = {
-  // 기본 정보
+// site_settings key → state 매핑
+const settingsKeyMap = {
+  site_name: 'orchestraName',
+  site_name_en: 'orchestraNameEn',
+  founded_year: 'foundedYear',
+  slogan: 'slogan',
+  contact_address: 'address',
+  contact_address_detail: 'addressDetail',
+  contact_phone: 'phone',
+  contact_fax: 'fax',
+  contact_email: 'email',
+  rehearsal_location: 'rehearsalLocation',
+  rehearsal_time: 'rehearsalTime',
+  sns_website: 'website',
+  sns_facebook: 'facebook',
+  sns_instagram: 'instagram',
+  sns_youtube: 'youtube',
+} as const;
+
+type SettingsState = Record<(typeof settingsKeyMap)[keyof typeof settingsKeyMap], string>;
+
+const defaultSettings: SettingsState = {
   orchestraName: '예산윈드오케스트라',
   orchestraNameEn: 'Yesan Wind Orchestra',
   foundedYear: '1998',
-  slogan: '클래식의 품격, 현대의 감각',
-  introduction: `예산윈드오케스트라는 1998년 창단 이래 27년간 충남 예산 지역의 문화예술 발전을 위해 노력해 왔습니다.
-
-매년 정기연주회와 다양한 기획공연을 통해 지역 주민들에게 수준 높은 관악 음악을 선사하고 있으며, 지역 음악 인재 발굴과 육성에도 힘쓰고 있습니다.
-
-앞으로도 음악을 통해 지역 사회와 소통하고 문화 발전에 기여하는 예산윈드오케스트라가 되겠습니다.`,
-  history: `1998년 - 예산윈드오케스트라 창단
-1999년 - 제1회 정기연주회 개최
-2005년 - 충남관악협회 가입
-2010년 - 예산군 문화예술 공로상 수상
-2015년 - 창단 15주년 기념 특별연주회
-2020년 - 창단 20주년 기념 연주회
-2024년 - 제46회 정기연주회`,
-
-  // 연락처 정보
-  address: '충남 예산군 예산읍 군청로 1',
-  addressDetail: '예산문화예술회관',
-  phone: '041-123-4567',
-  fax: '041-123-4568',
-  email: 'yesanwind@example.com',
-  rehearsalLocation: '예산군 예산읍 문화로 123',
-  rehearsalTime: '매주 토요일 오후 2시 ~ 5시',
-
-  // 소셜 미디어
-  website: 'https://yesanwind.or.kr',
-  facebook: 'https://facebook.com/yesanwind',
-  instagram: 'https://instagram.com/yesanwind',
-  youtube: 'https://youtube.com/@yesanwind',
+  slogan: '음악으로 하나되는 예산',
+  address: '',
+  addressDetail: '',
+  phone: '',
+  fax: '',
+  email: '',
+  rehearsalLocation: '',
+  rehearsalTime: '',
+  website: '',
+  facebook: '',
+  instagram: '',
+  youtube: '',
 };
 
 export default function SettingsAdminPage() {
-  const [settings, setSettings] = useState(initialSettings);
+  const supabase = useSupabase();
+  const [settings, setSettings] = useState<SettingsState>(defaultSettings);
+  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleChange = (key: keyof typeof settings, value: string) => {
+  const fetchSettings = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('key, value');
+
+    if (error) {
+      console.error('Error fetching settings:', error);
+      setLoading(false);
+      return;
+    }
+
+    if (data) {
+      const newSettings = { ...defaultSettings };
+      for (const row of data) {
+        const stateKey = (settingsKeyMap as Record<string, string>)[row.key];
+        if (stateKey) {
+          (newSettings as Record<string, string>)[stateKey] = row.value || '';
+        }
+      }
+      setSettings(newSettings);
+    }
+    setLoading(false);
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  const handleChange = (key: keyof SettingsState, value: string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = async () => {
     setIsSaving(true);
-    // Mock save - in real app, this would call an API
-    console.log('Saving settings:', settings);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // state → DB key 역매핑
+    const reverseMap: Record<string, string> = {};
+    for (const [dbKey, stateKey] of Object.entries(settingsKeyMap)) {
+      reverseMap[stateKey] = dbKey;
+    }
+
+    const upsertData = Object.entries(settings).map(([stateKey, value]) => ({
+      key: reverseMap[stateKey],
+      value: value || '',
+      updated_at: new Date().toISOString(),
+    })).filter(item => item.key); // key가 있는 것만
+
+    const { data, error } = await supabase
+      .from('site_settings')
+      .upsert(upsertData, { onConflict: 'key' })
+      .select();
+
     setIsSaving(false);
+
+    if (error) {
+      console.error('Error saving settings:', error);
+      alert('설정 저장에 실패했습니다: ' + error.message);
+      return;
+    }
+    if (!data || data.length === 0) {
+      alert('설정 저장에 실패했습니다. 권한을 확인해주세요.');
+      return;
+    }
     alert('설정이 저장되었습니다.');
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-gold-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -78,7 +145,7 @@ export default function SettingsAdminPage() {
           disabled={isSaving}
           className="bg-gold-500 hover:bg-gold-600 text-white"
         >
-          <Save className="mr-2 h-4 w-4" />
+          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           {isSaving ? '저장 중...' : '저장'}
         </Button>
       </div>
@@ -126,7 +193,6 @@ export default function SettingsAdminPage() {
                     id="orchestraName"
                     value={settings.orchestraName}
                     onChange={(e) => handleChange('orchestraName', e.target.value)}
-                    className=""
                   />
                 </div>
                 <div className="grid gap-2">
@@ -135,7 +201,6 @@ export default function SettingsAdminPage() {
                     id="orchestraNameEn"
                     value={settings.orchestraNameEn}
                     onChange={(e) => handleChange('orchestraNameEn', e.target.value)}
-                    className=""
                   />
                 </div>
               </div>
@@ -146,7 +211,6 @@ export default function SettingsAdminPage() {
                     id="foundedYear"
                     value={settings.foundedYear}
                     onChange={(e) => handleChange('foundedYear', e.target.value)}
-                    className=""
                   />
                 </div>
                 <div className="grid gap-2">
@@ -155,44 +219,9 @@ export default function SettingsAdminPage() {
                     id="slogan"
                     value={settings.slogan}
                     onChange={(e) => handleChange('slogan', e.target.value)}
-                    className=""
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-lg">인사말</CardTitle>
-              <CardDescription>
-                오케스트라 소개 페이지에 표시되는 인사말입니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={settings.introduction}
-                onChange={(e) => handleChange('introduction', e.target.value)}
-                rows={8}
-                className=""
-              />
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-lg">연혁</CardTitle>
-              <CardDescription>
-                오케스트라의 주요 연혁을 입력합니다. 한 줄에 하나씩 입력하세요.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={settings.history}
-                onChange={(e) => handleChange('history', e.target.value)}
-                rows={10}
-                className="bg-white font-mono text-sm"
-              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -216,7 +245,6 @@ export default function SettingsAdminPage() {
                   id="address"
                   value={settings.address}
                   onChange={(e) => handleChange('address', e.target.value)}
-                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -225,7 +253,6 @@ export default function SettingsAdminPage() {
                   id="addressDetail"
                   value={settings.addressDetail}
                   onChange={(e) => handleChange('addressDetail', e.target.value)}
-                  className=""
                 />
               </div>
               <Separator />
@@ -235,7 +262,6 @@ export default function SettingsAdminPage() {
                   id="rehearsalLocation"
                   value={settings.rehearsalLocation}
                   onChange={(e) => handleChange('rehearsalLocation', e.target.value)}
-                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -244,7 +270,6 @@ export default function SettingsAdminPage() {
                   id="rehearsalTime"
                   value={settings.rehearsalTime}
                   onChange={(e) => handleChange('rehearsalTime', e.target.value)}
-                  className=""
                 />
               </div>
             </CardContent>
@@ -268,7 +293,6 @@ export default function SettingsAdminPage() {
                     id="phone"
                     value={settings.phone}
                     onChange={(e) => handleChange('phone', e.target.value)}
-                    className=""
                   />
                 </div>
                 <div className="grid gap-2">
@@ -277,7 +301,6 @@ export default function SettingsAdminPage() {
                     id="fax"
                     value={settings.fax}
                     onChange={(e) => handleChange('fax', e.target.value)}
-                    className=""
                   />
                 </div>
               </div>
@@ -288,7 +311,6 @@ export default function SettingsAdminPage() {
                   type="email"
                   value={settings.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  className=""
                 />
               </div>
             </CardContent>
@@ -315,7 +337,6 @@ export default function SettingsAdminPage() {
                   value={settings.website}
                   onChange={(e) => handleChange('website', e.target.value)}
                   placeholder="https://yesanwind.or.kr"
-                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -328,7 +349,6 @@ export default function SettingsAdminPage() {
                   value={settings.facebook}
                   onChange={(e) => handleChange('facebook', e.target.value)}
                   placeholder="https://facebook.com/yesanwind"
-                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -341,7 +361,6 @@ export default function SettingsAdminPage() {
                   value={settings.instagram}
                   onChange={(e) => handleChange('instagram', e.target.value)}
                   placeholder="https://instagram.com/yesanwind"
-                  className=""
                 />
               </div>
               <div className="grid gap-2">
@@ -354,7 +373,6 @@ export default function SettingsAdminPage() {
                   value={settings.youtube}
                   onChange={(e) => handleChange('youtube', e.target.value)}
                   placeholder="https://youtube.com/@yesanwind"
-                  className=""
                 />
               </div>
             </CardContent>

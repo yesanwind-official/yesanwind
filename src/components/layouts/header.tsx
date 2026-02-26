@@ -80,6 +80,7 @@ export function Header() {
               alt="예산윈드오케스트라"
               width={40}
               height={40}
+              unoptimized
               className="w-10 h-10 object-contain"
             />
             <div className="flex flex-col">
