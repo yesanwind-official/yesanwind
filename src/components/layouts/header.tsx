@@ -87,7 +87,7 @@ export function Header() {
               <span className="font-serif text-lg lg:text-xl font-bold tracking-wide text-white light:text-dark-100 group-hover:text-gold-400 transition-colors">
                 YESAN WIND
               </span>
-              <span className="hidden sm:block text-[10px] text-dark-300 tracking-widest uppercase">
+              <span className="block text-[10px] text-dark-300 tracking-widest uppercase">
                 Orchestra
               </span>
             </div>
